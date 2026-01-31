@@ -31,6 +31,8 @@ export class RecordsStore {
   loading = false;
   error: string | null = null;
   selectedDefectTypes: string[] = [];
+  minSeverity: number | null = null;
+  maxSeverity: number | null = null;
 
   // Paging
   limit = 20;
@@ -70,6 +72,35 @@ export class RecordsStore {
     this.selectedDefectTypes = keys;
   }
 
+  setMinSeverity(v: number | null) {
+    this.minSeverity = v;
+    // Keep range consistent
+    if (
+      this.minSeverity != null &&
+      this.maxSeverity != null &&
+      this.minSeverity > this.maxSeverity
+    ) {
+      this.maxSeverity = this.minSeverity;
+    }
+  }
+
+  setMaxSeverity(v: number | null) {
+    this.maxSeverity = v;
+    // Keep range consistent
+    if (
+      this.minSeverity != null &&
+      this.maxSeverity != null &&
+      this.minSeverity > this.maxSeverity
+    ) {
+      this.minSeverity = this.maxSeverity;
+    }
+  }
+
+  clearSeverity() {
+    this.minSeverity = null;
+    this.maxSeverity = null;
+  }
+
   toggleDefectType(key: string) {
     if (this.selectedDefectTypes.includes(key)) {
       this.selectedDefectTypes = this.selectedDefectTypes.filter(
@@ -91,6 +122,11 @@ export class RecordsStore {
     params.set("offset", String(this.offset));
     params.set("sortBy", this.sortBy);
     params.set("order", this.order);
+
+    if (this.minSeverity != null)
+      params.set("minSeverity", String(this.minSeverity));
+    if (this.maxSeverity != null)
+      params.set("maxSeverity", String(this.maxSeverity));
 
     for (const dt of this.selectedDefectTypes) {
       params.append("defectType", dt);

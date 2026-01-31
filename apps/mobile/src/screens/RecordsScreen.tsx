@@ -5,157 +5,21 @@ import {
   Text,
   View,
   RefreshControl,
-  Modal,
-  Pressable,
-  ScrollView,
 } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import { useStores } from "../core/rootStore";
-
-function PillButton({
-  label,
-  active,
-  onPress,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Text
-      onPress={onPress}
-      style={{
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: active ? "#111" : "#ddd",
-        backgroundColor: active ? "#111" : "transparent",
-        color: active ? "#fff" : "#111",
-        overflow: "hidden",
-        marginRight: 8,
-      }}
-    >
-      {label}
-    </Text>
-  );
-}
-
-function DefectTypeDropdown({
-  label,
-  items,
-  selected,
-  onToggle,
-  onClear,
-  onClose,
-  visible,
-  onOpen,
-  renderLabel,
-  tSelected,
-  tAll,
-  tClose,
-  tClear,
-}: {
-  label: string;
-  items: Array<{ key: string; category: string }>;
-  selected: string[];
-  onToggle: (key: string) => void;
-  onClear: () => void;
-  visible: boolean;
-  onClose: () => void;
-  onOpen: () => void;
-  renderLabel: (key: string) => string;
-  tSelected: string;
-  tAll: string;
-  tClose: string;
-  tClear: string;
-}) {
-  const selectedCount = selected.length;
-
-  return (
-    <>
-      <Pressable
-        onPress={onOpen}
-        style={{
-          paddingVertical: 8,
-          paddingHorizontal: 12,
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: "#ddd",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ fontWeight: "600" }}>{label}</Text>
-        <Text style={{ opacity: 0.7 }}>
-          {selectedCount === 0 ? tAll : `${tSelected}: ${selectedCount}`}
-        </Text>
-      </Pressable>
-
-      <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-        <View style={{ flex: 1, paddingTop: 60 }}>
-          <View
-            style={{
-              paddingHorizontal: 16,
-              paddingBottom: 12,
-              borderBottomWidth: 1,
-              borderBottomColor: "#eee",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 18, fontWeight: "600" }}>{label}</Text>
-            <View style={{ flexDirection: "row" }}>
-              <Pressable onPress={onClear} style={{ padding: 10 }}>
-                <Text style={{ fontWeight: "600" }}>{tClear}</Text>
-              </Pressable>
-              <Pressable onPress={onClose} style={{ padding: 10 }}>
-                <Text style={{ fontWeight: "600" }}>{tClose}</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          <ScrollView contentContainerStyle={{ padding: 16 }}>
-            {items.map((it) => {
-              const active = selected.includes(it.key);
-              return (
-                <Pressable
-                  key={it.key}
-                  onPress={() => onToggle(it.key)}
-                  style={{
-                    paddingVertical: 12,
-                    paddingHorizontal: 12,
-                    borderWidth: 1,
-                    borderColor: active ? "#111" : "#ddd",
-                    borderRadius: 10,
-                    marginBottom: 10,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={{ fontWeight: "600" }}>
-                    {renderLabel(it.key)}
-                  </Text>
-                  <Text>{active ? "✓" : ""}</Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
-      </Modal>
-    </>
-  );
-}
+import PillButton from "../components/PillButton";
+import DefectTypeDropdown from "../components/DefectTypeDropdown";
+import SingleSelectDropdown from "../components/SingleSelectDropdown";
 
 export const RecordsScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
   const { sessionStore, recordsStore, defectTypesStore } = useStores();
 
   const [defectsOpen, setDefectsOpen] = useState(false);
+  const [minOpen, setMinOpen] = useState(false);
+  const [maxOpen, setMaxOpen] = useState(false);
 
   console.log(sessionStore.deviceId);
 
@@ -164,9 +28,12 @@ export const RecordsScreen = observer(() => {
     .sort()
     .join("|");
 
+  const severityKey = `${recordsStore.minSeverity ?? "n"}-${recordsStore.maxSeverity ?? "n"}`;
+
   useEffect(() => {
     if (!sessionStore.isReady) return;
     if (!sessionStore.deviceId) return;
+
     recordsStore.loadFirstPage(sessionStore.deviceId);
   }, [
     sessionStore.isReady,
@@ -175,6 +42,9 @@ export const RecordsScreen = observer(() => {
     recordsStore.sortBy,
     recordsStore.order,
     defectTypesKey,
+    recordsStore.minSeverity,
+    recordsStore.maxSeverity,
+    severityKey,
   ]);
 
   if (!sessionStore.isReady) {
@@ -197,8 +67,9 @@ export const RecordsScreen = observer(() => {
   }
 
   const deviceId = sessionStore.deviceId!;
-  const isEmpty = !recordsStore.loading && recordsStore.items.length === 0;
-
+  const isInitialLoading = recordsStore.loading && recordsStore.offset === 0;
+  const isEmpty =
+    !isInitialLoading && !recordsStore.error && recordsStore.items.length === 0;
   return (
     <View style={{ flex: 1, paddingTop: 60 }}>
       <Text
@@ -273,6 +144,53 @@ export const RecordsScreen = observer(() => {
             onPress={() => recordsStore.toggleOrder()}
           />
         </View>
+        <Text style={{ marginTop: 12, marginBottom: 6, opacity: 0.7 }}>
+          {t("screens:records.filters.severity")}
+        </Text>
+
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <SingleSelectDropdown
+            label={t("screens:records.filters.min")}
+            valueLabel={
+              recordsStore.minSeverity == null
+                ? t("screens:records.filters.any")
+                : String(recordsStore.minSeverity)
+            }
+            options={[
+              { label: t("screens:records.filters.any"), value: null },
+              { label: "1", value: 1 },
+              { label: "2", value: 2 },
+              { label: "3", value: 3 },
+              { label: "4", value: 4 },
+              { label: "5", value: 5 },
+            ]}
+            visible={minOpen}
+            onOpen={() => setMinOpen(true)}
+            onClose={() => setMinOpen(false)}
+            onSelect={(v) => recordsStore.setMinSeverity(v)}
+          />
+
+          <SingleSelectDropdown
+            label={t("screens:records.filters.max")}
+            valueLabel={
+              recordsStore.maxSeverity == null
+                ? t("screens:records.filters.any")
+                : String(recordsStore.maxSeverity)
+            }
+            options={[
+              { label: t("screens:records.filters.any"), value: null },
+              { label: "1", value: 1 },
+              { label: "2", value: 2 },
+              { label: "3", value: 3 },
+              { label: "4", value: 4 },
+              { label: "5", value: 5 },
+            ]}
+            visible={maxOpen}
+            onOpen={() => setMaxOpen(true)}
+            onClose={() => setMaxOpen(false)}
+            onSelect={(v) => recordsStore.setMaxSeverity(v)}
+          />
+        </View>
       </View>
 
       <Text style={{ paddingHorizontal: 16, marginBottom: 8, opacity: 0.7 }}>
@@ -291,7 +209,7 @@ export const RecordsScreen = observer(() => {
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
-          <Text>{t("screens:records.isEmpty")}</Text>
+          <Text>{t("screens:records.empty")}</Text>
         </View>
       ) : (
         <FlatList

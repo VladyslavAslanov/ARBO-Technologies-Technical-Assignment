@@ -11,7 +11,11 @@
       "allDefects": "Vše",
       "selected": "Vybráno",
       "close": "Zavřít",
-      "clear": "Vymazat"
+      "clear": "Vymazat",
+      "severity": "Závažnost",
+      "min": "Min",
+      "max": "Max",
+      "any": "—"
     }
   }
 }
