@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, DefectType } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../database/prisma.service';
 import { CreateRecordDto } from './dto/create-record.dto';
 import {
@@ -7,6 +8,8 @@ import {
   RecordsSortBy,
   SortOrder,
 } from './dto/list-records.query';
+import path from 'path';
+import fs from 'fs/promises';
 
 type UploadedPhoto = {
   path: string;
@@ -17,7 +20,10 @@ type UploadedPhoto = {
 
 @Injectable()
 export class RecordsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
+  ) {}
 
   async createRecord(
     userId: string,
@@ -163,5 +169,69 @@ export class RecordsService {
       offset,
       days,
     };
+  }
+
+  private toAbsoluteUploadPath(storedPath: string): string {
+    // storedPath example: "/uploads/<filename>.jpg"
+    const uploadDir = this.config.get<string>('UPLOAD_DIR') ?? './uploads';
+    const filename = path.basename(storedPath); // prevent path traversal
+    return path.resolve(process.cwd(), uploadDir, filename);
+  }
+
+  async getRecordById(userId: string, id: string) {
+    const record = await this.prisma.treeDefectRecord.findFirst({
+      where: { id, userId },
+      include: {
+        photos: {
+          select: {
+            id: true,
+            path: true,
+            mimeType: true,
+            sizeBytes: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!record) {
+      throw new NotFoundException('Record not found');
+    }
+
+    return record;
+  }
+  async deleteRecord(userId: string, id: string) {
+    // Load photo paths before DB deletion
+    const record = await this.prisma.treeDefectRecord.findFirst({
+      where: { id, userId },
+      include: { photos: { select: { path: true } } },
+    });
+
+    if (!record) {
+      throw new NotFoundException('Record not found');
+    }
+
+    const filePaths = record.photos.map((p) =>
+      this.toAbsoluteUploadPath(p.path),
+    );
+
+    // Delete DB rows (RecordPhoto is cascaded by relation)
+    await this.prisma.treeDefectRecord.delete({
+      where: { id: record.id },
+    });
+
+    // Best-effort file cleanup
+    await Promise.all(
+      filePaths.map(async (p) => {
+        try {
+          await fs.unlink(p);
+        } catch {
+          // Best-effort cleanup
+        }
+      }),
+    );
+
+    return { status: 'deleted' as const };
   }
 }

@@ -2,7 +2,10 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  ParseUUIDPipe,
   Post,
   Query,
   UploadedFiles,
@@ -135,5 +138,21 @@ export class RecordsController {
   @Get()
   async list(@UserId() userId: string, @Query() query: ListRecordsQuery) {
     return this.records.listRecords(userId, query);
+  }
+
+  @Get(':id')
+  async getById(
+    @UserId() userId: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return this.records.getRecordById(userId, id);
+  }
+
+  @Delete(':id')
+  async remove(
+    @UserId() userId: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return this.records.deleteRecord(userId, id);
   }
 }
