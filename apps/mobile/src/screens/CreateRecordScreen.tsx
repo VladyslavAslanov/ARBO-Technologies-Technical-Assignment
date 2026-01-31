@@ -129,16 +129,43 @@ async function normalizeToJpeg(
   return { uri: currentUri, mimeType: "image/jpeg" };
 }
 
-async function getFileSizeBytes(uri: string): Promise<number> {
-  const res = await fetch(uri);
-  const blob = await res.blob();
-  return blob.size;
+function parseApiErrorMessage(raw: string): string {
+  if (!raw) return "Request failed";
+
+  try {
+    const data = JSON.parse(raw);
+    const msg = (data?.message ?? data?.error ?? data) as unknown;
+
+    if (Array.isArray(msg)) return msg.join("\n");
+    if (typeof msg === "string") return msg;
+
+    return raw;
+  } catch {
+    return raw;
+  }
+}
+
+function parseApiErrorMessage(raw: string): string {
+  if (!raw) return "Request failed";
+
+  try {
+    const data = JSON.parse(raw);
+
+    const msg = (data?.message ?? data?.error ?? data) as unknown;
+
+    if (Array.isArray(msg)) return msg.join("\n");
+    if (typeof msg === "string") return msg;
+
+    return raw;
+  } catch {
+    return raw;
+  }
 }
 
 export const CreateRecordScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
   const router = useRouter();
-  const { sessionStore, defectTypesStore } = useStores();
+  const { sessionStore, defectTypesStore, recordsStore } = useStores();
 
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
   const [defectType, setDefectType] = useState<string | null>(null);
@@ -187,6 +214,8 @@ export const CreateRecordScreen = observer(() => {
   const addAssets = (assets: ImagePicker.ImagePickerAsset[]) => {
     setPhotos((prev) => {
       const next = prev.slice();
+      const before = next.length;
+
       for (const a of assets) {
         if (next.length >= maxPhotos) break;
         next.push({
@@ -197,6 +226,20 @@ export const CreateRecordScreen = observer(() => {
           mimeType: a.mimeType,
         });
       }
+
+      const added = next.length - before;
+      const skipped = assets.length - added;
+
+      if (skipped > 0) {
+        Alert.alert(
+          t("common:info", { defaultValue: "Info" }),
+          t("screens:create.maxPhotosReached", {
+            defaultValue:
+              "Bylo dosaženo limitu 10 fotek. Další byly přeskočeny.",
+          })
+        );
+      }
+
       return next;
     });
   };
@@ -311,9 +354,12 @@ export const CreateRecordScreen = observer(() => {
       });
 
       const text = await resp.text();
-      if (!resp.ok)
-        throw new Error(text || `Upload failed with ${resp.status}`);
 
+      if (!resp.ok) {
+        throw new Error(parseApiErrorMessage(text));
+      }
+
+      await recordsStore.loadFirstPage(deviceId);
       router.back();
     } catch (e: any) {
       Alert.alert(
@@ -442,7 +488,15 @@ export const CreateRecordScreen = observer(() => {
           </Text>
 
           <View className={photoButtonsRowClassName}>
-            <Pressable onPress={takePhoto} className={photoButtonClassName}>
+            <Pressable
+              onPress={takePhoto}
+              disabled={submitting}
+              className={[
+                photoButtonClassName,
+                submitting ? "opacity-50" : "",
+              ].join(" ")}
+            >
+              {" "}
               <Text className={photoButtonTextClassName}>
                 {t("screens:create.takePhoto", {
                   defaultValue: "Sfotografovat",
@@ -468,7 +522,11 @@ export const CreateRecordScreen = observer(() => {
                 <Pressable
                   key={`${p.uri}-${idx}`}
                   onPress={() => removePhotoAt(idx)}
-                  className={photoTileClassName}
+                  disabled={submitting}
+                  className={[
+                    photoTileClassName,
+                    submitting ? "opacity-70" : "",
+                  ].join(" ")}
                 >
                   <Image
                     source={{ uri: p.uri }}
