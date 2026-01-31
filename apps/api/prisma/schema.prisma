@@ -1,14 +1,67 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
+}
+
+enum DefectType {
+  DEAD_WOOD
+  CRACKS
+  WEAK_UNION_INCLUDED_BARK
+  HEARTWOOD_DECAY
+  SAPWOOD_DAMAGE_DECAY
+  CAVITY_HOLLOW
+  CONKS_MUSHROOMS
+  CANKERS_GALLS_BURLS
+  ROOT_PROBLEMS
+  ROOT_PLATE_LIFTING
+  LEAN
+  POOR_ARCHITECTURE
+  LIGHTNING_DAMAGE
+  SAP_OOZE
+}
+
+model User {
+  id        String            @id @default(uuid())
+  deviceId  String            @unique
+  createdAt DateTime          @default(now())
+  records   TreeDefectRecord[]
+}
+
+model TreeDefectRecord {
+  id               String        @id @default(uuid())
+  userId           String
+  defectType       DefectType
+  severity         Int
+  note             String?
+  lat              Float?
+  lng              Float?
+  locationAccuracy Float?
+  recordedAt       DateTime?
+  createdAt        DateTime      @default(now())
+
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos RecordPhoto[]
+
+  @@index([userId, createdAt])
+  @@index([userId, severity])
+  @@index([userId, defectType])
+}
+
+model RecordPhoto {
+  id           String   @id @default(uuid())
+  recordId     String
+  path         String   // Example: "/uploads/<filename>.jpg"
+  mimeType     String
+  originalName String
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
+
+  record TreeDefectRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  @@index([recordId])
 }

@@ -5,8 +5,8 @@
     "apps/*"
   ],
   "scripts": {
-    "dev:api": "npm --workspace apps/api run start:dev",
-    "dev:mobile": "npm --workspace apps/mobile run start",
+    "dev:api": "npm --workspace=api run start:dev",
+    "dev:mobile": "npm --workspace=mobile run start",
     "format": "prettier --write .",
     "lint": "npm --workspaces --if-present run lint",
     "test": "npm --workspaces --if-present run test"
