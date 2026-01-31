@@ -6,6 +6,7 @@ import {
   View,
   RefreshControl,
   Pressable,
+  Image,
 } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
@@ -271,16 +272,48 @@ export const RecordsScreen = observer(() => {
                   marginBottom: 10,
                 }}
               >
-                <Text style={{ fontWeight: "600" }}>
-                  {t(`defects:${item.defectType}.label`, {
-                    defaultValue: item.defectType,
-                  })}{" "}
-                  • {item.severity}/5
-                </Text>
-                <Text style={{ marginTop: 4 }}>
-                  {new Date(item.createdAt).toLocaleString("cs-CZ")}
-                </Text>
-                <Text style={{ marginTop: 4 }}>photos: {item.photosCount}</Text>
+                <View style={{ flexDirection: "row", gap: 12 }}>
+                  {item.coverPhotoPath ? (
+                    <Image
+                      source={{
+                        uri: `${process.env.EXPO_PUBLIC_API_URL}${item.coverPhotoPath}`,
+                      }}
+                      style={{
+                        width: 72,
+                        height: 72,
+                        borderRadius: 10,
+                        backgroundColor: "#eee",
+                      }}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View
+                      style={{
+                        width: 72,
+                        height: 72,
+                        borderRadius: 10,
+                        backgroundColor: "#eee",
+                      }}
+                    />
+                  )}
+
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontWeight: "600" }}>
+                      {t(`defects:${item.defectType}.label`, {
+                        defaultValue: item.defectType,
+                      })}{" "}
+                      • {item.severity}/5
+                    </Text>
+
+                    <Text style={{ marginTop: 4 }}>
+                      {new Date(item.createdAt).toLocaleString("cs-CZ")}
+                    </Text>
+
+                    <Text style={{ marginTop: 4 }}>
+                      photos: {item.photosCount}
+                    </Text>
+                  </View>
+                </View>
               </View>
             </Pressable>
           )}

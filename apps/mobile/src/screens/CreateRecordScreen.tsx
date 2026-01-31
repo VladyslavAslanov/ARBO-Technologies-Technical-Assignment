@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   View,
+  Image,
 } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
@@ -381,25 +382,52 @@ export const CreateRecordScreen = observer(() => {
         </View>
 
         {photos.length > 0 ? (
-          <View style={{ marginTop: 12 }}>
+          <View
+            style={{
+              marginTop: 12,
+              flexDirection: "row",
+              flexWrap: "wrap",
+              gap: 10,
+            }}
+          >
             {photos.map((p, idx) => (
               <Pressable
                 key={`${p.uri}-${idx}`}
                 onPress={() => removePhotoAt(idx)}
                 style={{
-                  paddingVertical: 10,
-                  paddingHorizontal: 12,
+                  width: 110,
+                  height: 110,
+                  borderRadius: 12,
+                  overflow: "hidden",
                   borderWidth: 1,
                   borderColor: "#ddd",
-                  borderRadius: 10,
-                  marginBottom: 10,
+                  backgroundColor: "#eee",
                 }}
               >
-                <Text style={{ fontWeight: "600" }}>Photo {idx + 1}</Text>
-                <Text style={{ opacity: 0.7 }} numberOfLines={1}>
-                  {p.uri}
-                </Text>
-                <Text style={{ opacity: 0.7 }}>Tap to remove</Text>
+                <Image
+                  source={{ uri: p.uri }}
+                  style={{ width: "100%", height: "100%" }}
+                  resizeMode="cover"
+                />
+
+                {/* small remove badge */}
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    backgroundColor: "rgba(0,0,0,0.6)",
+                    borderRadius: 10,
+                    paddingHorizontal: 6,
+                    paddingVertical: 2,
+                  }}
+                >
+                  <Text
+                    style={{ color: "#fff", fontWeight: "600", fontSize: 12 }}
+                  >
+                    ×
+                  </Text>
+                </View>
               </Pressable>
             ))}
           </View>

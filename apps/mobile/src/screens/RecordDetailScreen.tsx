@@ -6,6 +6,7 @@ import {
   ScrollView,
   Text,
   View,
+  Image,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -234,16 +235,22 @@ const RecordDetailScreen = observer(() => {
               key={p.id}
               style={{
                 marginTop: 10,
-                padding: 12,
                 borderWidth: 1,
                 borderColor: "#ddd",
-                borderRadius: 10,
+                borderRadius: 12,
+                overflow: "hidden",
               }}
             >
-              <Text style={{ fontWeight: "600" }}>Photo</Text>
-              <Text style={{ opacity: 0.7 }} numberOfLines={1}>
-                {resolvePhotoUrl(baseUrl, p.path)}
-              </Text>
+              <Image
+                source={{ uri: resolvePhotoUrl(baseUrl, p.path) }}
+                style={{ width: "100%", height: 220, backgroundColor: "#eee" }}
+                resizeMode="cover"
+              />
+              <View style={{ padding: 10 }}>
+                <Text style={{ opacity: 0.7, fontSize: 12 }} numberOfLines={1}>
+                  {p.path}
+                </Text>
+              </View>
             </View>
           ))}
         </View>
