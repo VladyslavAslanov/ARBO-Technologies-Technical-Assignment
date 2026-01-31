@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Pressable,
   ScrollView,
   Text,
   TextInput,
   View,
-  Image,
 } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
@@ -17,6 +17,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 
 import { useStores } from "../core/rootStore";
 import { getCurrentLocation } from "../services/locationService";
+import PillButton from "../components/PillButton";
 
 type PickedPhoto = {
   uri: string;
@@ -26,8 +27,72 @@ type PickedPhoto = {
   mimeType?: string;
 };
 
-const MAX_PHOTOS = 10;
-const MAX_BYTES = 5 * 1024 * 1024;
+const maxPhotos = 10;
+const maxBytes = 5 * 1024 * 1024;
+
+const loadingCenterClassName = "flex-1 items-center justify-center";
+const loadingTextClassName = "mt-2 text-zinc-500 dark:text-zinc-400";
+
+const screenClassName = "flex-1 pt-16 bg-white dark:bg-zinc-950";
+
+const headerClassName = "px-4 mb-3 flex-row items-center justify-between";
+const titleClassName =
+  "text-2xl font-semibold text-zinc-900 dark:text-zinc-100";
+
+const headerActionPressableClassName = "px-3 py-2";
+const headerActionTextClassName =
+  "font-semibold text-zinc-900 dark:text-zinc-100";
+
+const contentClassName = "p-4 pb-6";
+
+const labelClassName = "mb-1.5 text-zinc-500 dark:text-zinc-400";
+const sectionSpacerClassName = "mt-4";
+
+const listContainerClassName =
+  "rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900";
+
+const listItemBaseClassName = "px-3 py-3";
+const listItemDividerClassName =
+  "border-t border-zinc-200 dark:border-zinc-800";
+const listItemActiveClassName = "bg-zinc-900 dark:bg-zinc-100";
+const listItemInactiveClassName = "bg-transparent";
+
+const listItemTextBaseClassName = "font-semibold";
+const listItemTextActiveClassName = "text-white dark:text-zinc-900";
+const listItemTextInactiveClassName = "text-zinc-900 dark:text-zinc-100";
+
+const inputClassName =
+  "rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-3 text-zinc-900 dark:text-zinc-100";
+
+const photoButtonsRowClassName = "flex-row gap-2.5";
+const photoButtonClassName =
+  "flex-1 items-center rounded-xl border border-zinc-900 dark:border-zinc-100 py-3";
+const photoButtonTextClassName =
+  "font-semibold text-zinc-900 dark:text-zinc-100";
+
+const photoGridClassName = "mt-3 flex-row flex-wrap gap-2.5";
+
+const photoTileClassName =
+  "w-[110px] h-[110px] rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-200 dark:bg-zinc-800";
+
+const photoTileImageClassName = "w-full h-full";
+
+const removeBadgeClassName =
+  "absolute top-1.5 right-1.5 rounded-full bg-black/60 px-2 py-0.5";
+const removeBadgeTextClassName = "text-white font-semibold text-xs";
+
+const gpsHintClassName = "mt-2 text-xs text-zinc-500 dark:text-zinc-400";
+
+const submitButtonBaseClassName = "mt-4 rounded-xl py-3.5 items-center";
+const submitButtonEnabledClassName = "bg-zinc-900 dark:bg-zinc-100";
+const submitButtonDisabledClassName = "bg-zinc-200 dark:bg-zinc-800";
+
+const submitTextEnabledClassName =
+  "font-semibold text-white dark:text-zinc-900";
+const submitTextDisabledClassName =
+  "font-semibold text-zinc-500 dark:text-zinc-400";
+
+const limitHintClassName = "mt-2 text-xs text-zinc-500 dark:text-zinc-400";
 
 async function ensureCameraPermission() {
   const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -42,7 +107,6 @@ async function ensureMediaPermission() {
 async function normalizeToJpeg(
   assetUri: string
 ): Promise<{ uri: string; mimeType: string }> {
-  // Convert to JPEG and reduce size if needed. Start with good quality and scale down progressively.
   let currentUri = assetUri;
 
   for (const step of [
@@ -59,7 +123,6 @@ async function normalizeToJpeg(
       format: ImageManipulator.SaveFormat.JPEG,
     });
 
-    // Note: file size check will be done by fetching blob size before upload.
     currentUri = result.uri;
   }
 
@@ -89,6 +152,7 @@ export const CreateRecordScreen = observer(() => {
   } | null>(null);
 
   const deviceId = sessionStore.deviceId;
+  const baseUrl = process.env.EXPO_PUBLIC_API_URL!;
 
   useEffect(() => {
     let cancelled = false;
@@ -115,7 +179,7 @@ export const CreateRecordScreen = observer(() => {
       !!deviceId &&
       !!defectType &&
       photos.length >= 1 &&
-      photos.length <= MAX_PHOTOS &&
+      photos.length <= maxPhotos &&
       !submitting
     );
   }, [deviceId, defectType, photos.length, submitting]);
@@ -124,7 +188,7 @@ export const CreateRecordScreen = observer(() => {
     setPhotos((prev) => {
       const next = prev.slice();
       for (const a of assets) {
-        if (next.length >= MAX_PHOTOS) break;
+        if (next.length >= maxPhotos) break;
         next.push({
           uri: a.uri,
           width: a.width,
@@ -140,7 +204,12 @@ export const CreateRecordScreen = observer(() => {
   const pickFromLibrary = async () => {
     const ok = await ensureMediaPermission();
     if (!ok) {
-      Alert.alert("Permission", "Media library permission is required");
+      Alert.alert(
+        t("screens:create.permissionTitle", { defaultValue: "Povolení" }),
+        t("screens:create.permissionMedia", {
+          defaultValue: "Je potřeba povolit přístup ke galerii.",
+        })
+      );
       return;
     }
 
@@ -157,7 +226,12 @@ export const CreateRecordScreen = observer(() => {
   const takePhoto = async () => {
     const ok = await ensureCameraPermission();
     if (!ok) {
-      Alert.alert("Permission", "Camera permission is required");
+      Alert.alert(
+        t("screens:create.permissionTitle", { defaultValue: "Povolení" }),
+        t("screens:create.permissionCamera", {
+          defaultValue: "Je potřeba povolit přístup ke kameře.",
+        })
+      );
       return;
     }
 
@@ -179,37 +253,49 @@ export const CreateRecordScreen = observer(() => {
     if (!defectType) return;
 
     if (photos.length < 1) {
-      Alert.alert("Validation", "At least 1 photo is required");
+      Alert.alert(
+        t("common:error", { defaultValue: "Chyba" }),
+        t("screens:create.validationMinPhotos", {
+          defaultValue: "Je potřeba přidat alespoň 1 fotku.",
+        })
+      );
       return;
     }
 
     setSubmitting(true);
 
     try {
-      // Normalize and validate size
       const normalized: Array<{ uri: string; mimeType: string; size: number }> =
         [];
+
       for (const p of photos) {
         const { uri, mimeType } = await normalizeToJpeg(p.uri);
         const size = await getFileSizeBytes(uri);
 
-        if (size > MAX_BYTES) {
+        if (size > maxBytes) {
           throw new Error(
-            "One of the photos is larger than 5 MB after normalization"
+            t("screens:create.photoTooLarge", {
+              defaultValue: "Jedna z fotek je po převodu větší než 5 MB.",
+            })
           );
         }
 
         normalized.push({ uri, mimeType, size });
       }
 
-      const baseUrl = process.env.EXPO_PUBLIC_API_URL!;
       const form = new FormData();
-
       form.append("defectType", defectType);
       form.append("severity", String(severity));
       if (note.trim().length) form.append("note", note.trim());
 
-      // Server expects "photos" field
+      if (location) {
+        form.append("lat", String(location.lat));
+        form.append("lng", String(location.lng));
+        if (location.accuracy != null) {
+          form.append("locationAccuracy", String(location.accuracy));
+        }
+      }
+
       normalized.forEach((p, idx) => {
         form.append("photos", {
           uri: p.uri,
@@ -220,26 +306,23 @@ export const CreateRecordScreen = observer(() => {
 
       const resp = await fetch(`${baseUrl}/api/records`, {
         method: "POST",
-        headers: {
-          "x-device-id": deviceId,
-        },
+        headers: { "x-device-id": deviceId },
         body: form,
       });
 
       const text = await resp.text();
-      if (!resp.ok) {
+      if (!resp.ok)
         throw new Error(text || `Upload failed with ${resp.status}`);
-      }
-      if (location) {
-        form.append("lat", String(location.lat));
-        form.append("lng", String(location.lng));
-        if (location.accuracy != null)
-          form.append("locationAccuracy", String(location.accuracy));
-      }
-      // Back to list and refresh
+
       router.back();
     } catch (e: any) {
-      Alert.alert("Error", e?.message ?? "Failed to create record");
+      Alert.alert(
+        t("common:error", { defaultValue: "Chyba" }),
+        e?.message ??
+          t("screens:create.createFailed", {
+            defaultValue: "Nepodařilo se vytvořit záznam.",
+          })
+      );
     } finally {
       setSubmitting(false);
     }
@@ -247,53 +330,70 @@ export const CreateRecordScreen = observer(() => {
 
   if (!deviceId) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <View className={loadingCenterClassName}>
         <ActivityIndicator />
-        <Text style={{ marginTop: 8 }}>{t("common:loading")}</Text>
+        <Text className={loadingTextClassName}>{t("common:loading")}</Text>
       </View>
     );
   }
 
   const defectOptions = defectTypesStore.items;
 
+  const submitButtonClassName = [
+    submitButtonBaseClassName,
+    canSubmit ? submitButtonEnabledClassName : submitButtonDisabledClassName,
+  ].join(" ");
+
+  const submitTextClassName = canSubmit
+    ? submitTextEnabledClassName
+    : submitTextDisabledClassName;
+
   return (
-    <View style={{ flex: 1, paddingTop: 60 }}>
-      <View
-        style={{
-          paddingHorizontal: 16,
-          marginBottom: 12,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Text style={{ fontSize: 22, fontWeight: "600" }}>Nový záznam</Text>
-        <Pressable onPress={() => router.back()} style={{ padding: 10 }}>
-          <Text style={{ fontWeight: "600" }}>Zavřít</Text>
+    <View className={screenClassName}>
+      <View className={headerClassName}>
+        <Text className={titleClassName}>
+          {t("screens:create.title", { defaultValue: "Nový záznam" })}
+        </Text>
+
+        <Pressable
+          onPress={() => router.back()}
+          className={headerActionPressableClassName}
+        >
+          <Text className={headerActionTextClassName}>
+            {t("common:close", { defaultValue: "Zavřít" })}
+          </Text>
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24 }}>
-        <Text style={{ marginBottom: 6, opacity: 0.7 }}>Defekt</Text>
+      <ScrollView contentContainerClassName={contentClassName}>
+        <Text className={labelClassName}>
+          {t("screens:create.defectType", { defaultValue: "Defekt" })}
+        </Text>
 
-        <View style={{ borderWidth: 1, borderColor: "#ddd", borderRadius: 10 }}>
-          {defectOptions.map((it) => {
+        <View className={listContainerClassName}>
+          {defectOptions.map((it, idx) => {
             const active = defectType === it.key;
+
+            const itemClassName = [
+              listItemBaseClassName,
+              idx === 0 ? "" : listItemDividerClassName,
+              active ? listItemActiveClassName : listItemInactiveClassName,
+            ].join(" ");
+
+            const itemTextClassName = [
+              listItemTextBaseClassName,
+              active
+                ? listItemTextActiveClassName
+                : listItemTextInactiveClassName,
+            ].join(" ");
+
             return (
               <Pressable
                 key={it.key}
                 onPress={() => setDefectType(it.key)}
-                style={{
-                  paddingVertical: 12,
-                  paddingHorizontal: 12,
-                  borderTopWidth: it.key === defectOptions[0]?.key ? 0 : 1,
-                  borderTopColor: "#eee",
-                  backgroundColor: active ? "#111" : "transparent",
-                }}
+                className={itemClassName}
               >
-                <Text
-                  style={{ color: active ? "#fff" : "#111", fontWeight: "600" }}
-                >
+                <Text className={itemTextClassName}>
                   {t(`defects:${it.key}.label`, { defaultValue: it.key })}
                 </Text>
               </Pressable>
@@ -301,169 +401,116 @@ export const CreateRecordScreen = observer(() => {
           })}
         </View>
 
-        <Text style={{ marginTop: 16, marginBottom: 6, opacity: 0.7 }}>
-          Závažnost (1–5)
-        </Text>
-        <View style={{ flexDirection: "row" }}>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <Pressable
-              key={n}
-              onPress={() => setSeverity(n)}
-              style={{
-                paddingVertical: 8,
-                paddingHorizontal: 12,
-                borderRadius: 999,
-                borderWidth: 1,
-                borderColor: severity === n ? "#111" : "#ddd",
-                backgroundColor: severity === n ? "#111" : "transparent",
-                marginRight: 8,
-              }}
-            >
-              <Text
-                style={{
-                  color: severity === n ? "#fff" : "#111",
-                  fontWeight: "600",
-                }}
-              >
-                {n}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+        <View className={sectionSpacerClassName}>
+          <Text className={labelClassName}>
+            {t("screens:create.severity", { defaultValue: "Závažnost (1–5)" })}
+          </Text>
 
-        <Text style={{ marginTop: 16, marginBottom: 6, opacity: 0.7 }}>
-          Poznámka
-        </Text>
-        <TextInput
-          value={note}
-          onChangeText={setNote}
-          placeholder="Volitelné…"
-          style={{
-            borderWidth: 1,
-            borderColor: "#ddd",
-            borderRadius: 10,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-          }}
-        />
-
-        <Text style={{ marginTop: 16, marginBottom: 6, opacity: 0.7 }}>
-          Fotky ({photos.length}/{MAX_PHOTOS})
-        </Text>
-
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          <Pressable
-            onPress={takePhoto}
-            style={{
-              flex: 1,
-              paddingVertical: 12,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "#111",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontWeight: "600" }}>Sfotografovat</Text>
-          </Pressable>
-
-          <Pressable
-            onPress={pickFromLibrary}
-            style={{
-              flex: 1,
-              paddingVertical: 12,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "#111",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontWeight: "600" }}>Vybrat z galerie</Text>
-          </Pressable>
-        </View>
-
-        {photos.length > 0 ? (
-          <View
-            style={{
-              marginTop: 12,
-              flexDirection: "row",
-              flexWrap: "wrap",
-              gap: 10,
-            }}
-          >
-            {photos.map((p, idx) => (
-              <Pressable
-                key={`${p.uri}-${idx}`}
-                onPress={() => removePhotoAt(idx)}
-                style={{
-                  width: 110,
-                  height: 110,
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  borderWidth: 1,
-                  borderColor: "#ddd",
-                  backgroundColor: "#eee",
-                }}
-              >
-                <Image
-                  source={{ uri: p.uri }}
-                  style={{ width: "100%", height: "100%" }}
-                  resizeMode="cover"
-                />
-
-                {/* small remove badge */}
-                <View
-                  style={{
-                    position: "absolute",
-                    top: 6,
-                    right: 6,
-                    backgroundColor: "rgba(0,0,0,0.6)",
-                    borderRadius: 10,
-                    paddingHorizontal: 6,
-                    paddingVertical: 2,
-                  }}
-                >
-                  <Text
-                    style={{ color: "#fff", fontWeight: "600", fontSize: 12 }}
-                  >
-                    ×
-                  </Text>
-                </View>
-              </Pressable>
+          <View className="flex-row">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <PillButton
+                key={n}
+                label={String(n)}
+                active={severity === n}
+                onPress={() => setSeverity(n)}
+              />
             ))}
           </View>
-        ) : null}
+        </View>
 
-        <Text style={{ marginTop: 8, opacity: 0.6, fontSize: 12 }}>
-          {location
-            ? `GPS: ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)} (±${location.accuracy ?? "—"} m)`
-            : "GPS: —"}
-        </Text>
+        <View className={sectionSpacerClassName}>
+          <Text className={labelClassName}>
+            {t("screens:create.note", { defaultValue: "Poznámka" })}
+          </Text>
 
-        <Pressable
-          onPress={submit}
-          disabled={!canSubmit}
-          style={{
-            marginTop: 16,
-            paddingVertical: 14,
-            borderRadius: 12,
-            backgroundColor: canSubmit ? "#111" : "#ddd",
-            alignItems: "center",
-          }}
-        >
-          {submitting ? (
-            <ActivityIndicator />
-          ) : (
-            <Text
-              style={{ color: canSubmit ? "#fff" : "#666", fontWeight: "600" }}
+          <TextInput
+            value={note}
+            onChangeText={setNote}
+            placeholder={t("screens:create.notePlaceholder", {
+              defaultValue: "Volitelné…",
+            })}
+            placeholderTextColor="#71717a"
+            className={inputClassName}
+            multiline
+          />
+        </View>
+
+        <View className={sectionSpacerClassName}>
+          <Text className={labelClassName}>
+            {t("screens:create.photos", { defaultValue: "Fotky" })} (
+            {photos.length}/{maxPhotos})
+          </Text>
+
+          <View className={photoButtonsRowClassName}>
+            <Pressable onPress={takePhoto} className={photoButtonClassName}>
+              <Text className={photoButtonTextClassName}>
+                {t("screens:create.takePhoto", {
+                  defaultValue: "Sfotografovat",
+                })}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={pickFromLibrary}
+              className={photoButtonClassName}
             >
-              Odeslat
-            </Text>
-          )}
-        </Pressable>
+              <Text className={photoButtonTextClassName}>
+                {t("screens:create.pickFromGallery", {
+                  defaultValue: "Vybrat z galerie",
+                })}
+              </Text>
+            </Pressable>
+          </View>
 
-        <Text style={{ marginTop: 10, opacity: 0.6, fontSize: 12 }}>
-          Limit: max 10 fotek, každá do 5 MB (po převodu do JPEG).
-        </Text>
+          {photos.length > 0 ? (
+            <View className={photoGridClassName}>
+              {photos.map((p, idx) => (
+                <Pressable
+                  key={`${p.uri}-${idx}`}
+                  onPress={() => removePhotoAt(idx)}
+                  className={photoTileClassName}
+                >
+                  <Image
+                    source={{ uri: p.uri }}
+                    className={photoTileImageClassName}
+                    resizeMode="cover"
+                  />
+
+                  <View className={removeBadgeClassName}>
+                    <Text className={removeBadgeTextClassName}>×</Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+
+          <Text className={gpsHintClassName}>
+            {location
+              ? `GPS: ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)} (±${location.accuracy ?? "—"} m)`
+              : "GPS: —"}
+          </Text>
+
+          <Pressable
+            onPress={submit}
+            disabled={!canSubmit}
+            className={submitButtonClassName}
+          >
+            {submitting ? (
+              <ActivityIndicator />
+            ) : (
+              <Text className={submitTextClassName}>
+                {t("screens:create.submit", { defaultValue: "Odeslat" })}
+              </Text>
+            )}
+          </Pressable>
+
+          <Text className={limitHintClassName}>
+            {t("screens:create.photoLimits", {
+              defaultValue:
+                "Limit: max 10 fotek, každá do 5 MB (po převodu do JPEG).",
+            })}
+          </Text>
+        </View>
       </ScrollView>
     </View>
   );

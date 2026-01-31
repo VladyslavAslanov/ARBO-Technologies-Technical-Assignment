@@ -1,4 +1,5 @@
-import { Text } from "react-native";
+import React from "react";
+import { Pressable, Text } from "react-native";
 
 interface PillButtonProps {
   label: string;
@@ -6,24 +7,33 @@ interface PillButtonProps {
   onPress: () => void;
 }
 
+const basePressableClass = "mr-2 rounded-full border px-3 py-1.5";
+
+const activePressableClass =
+  "border-zinc-300 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800";
+
+const inactivePressableClass =
+  "border-zinc-200 bg-transparent dark:border-zinc-800 dark:bg-transparent";
+
+const baseTextClass = "font-semibold";
+const activeTextClass = "text-zinc-900 dark:text-zinc-100";
+const inactiveTextClass = "text-zinc-700 dark:text-zinc-300";
+
 const PillButton = ({ label, active, onPress }: PillButtonProps) => {
+  const pressableClassName = [
+    basePressableClass,
+    active ? activePressableClass : inactivePressableClass,
+  ].join(" ");
+
+  const textClassName = [
+    baseTextClass,
+    active ? activeTextClass : inactiveTextClass,
+  ].join(" ");
+
   return (
-    <Text
-      onPress={onPress}
-      style={{
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: active ? "#111" : "#ddd",
-        backgroundColor: active ? "#111" : "transparent",
-        color: active ? "#fff" : "#111",
-        overflow: "hidden",
-        marginRight: 8,
-      }}
-    >
-      {label}
-    </Text>
+    <Pressable onPress={onPress} className={pressableClassName}>
+      <Text className={textClassName}>{label}</Text>
+    </Pressable>
   );
 };
 

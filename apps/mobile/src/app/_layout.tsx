@@ -1,16 +1,24 @@
+import "../../global.css";
+
 import "../i18n";
 
 import React, { useEffect } from "react";
+import { View } from "react-native";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useColorScheme } from "nativewind";
+
 import { StoresContext, rootStore } from "../core/rootStore";
 
-const RootLayout = () => {
+export default function RootLayout() {
+  const { colorScheme } = useColorScheme();
+
   useEffect(() => {
-    rootStore.sessionStore.init();
     const run = async () => {
       await rootStore.sessionStore.init();
-      if (rootStore.sessionStore.deviceId) {
-        await rootStore.defectTypesStore.load(rootStore.sessionStore.deviceId);
+      const deviceId = rootStore.sessionStore.deviceId;
+      if (deviceId) {
+        await rootStore.defectTypesStore.load(deviceId);
       }
     };
     run();
@@ -18,9 +26,10 @@ const RootLayout = () => {
 
   return (
     <StoresContext.Provider value={rootStore}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <View className="flex-1 bg-white dark:bg-zinc-950">
+        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+        <Stack screenOptions={{ headerShown: false }} />
+      </View>
     </StoresContext.Provider>
   );
-};
-
-export default RootLayout;
+}

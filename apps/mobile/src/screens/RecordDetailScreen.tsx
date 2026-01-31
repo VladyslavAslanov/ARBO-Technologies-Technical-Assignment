@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Pressable,
   ScrollView,
   Text,
   View,
-  Image,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -37,6 +37,38 @@ function resolvePhotoUrl(baseUrl: string, path: string) {
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
   return `${baseUrl}${path}`;
 }
+
+const loadingCenterClassName = "flex-1 items-center justify-center";
+const loadingTextClassName = "mt-2 text-zinc-500 dark:text-zinc-400";
+
+const screenClassName = "flex-1 pt-16 bg-white dark:bg-zinc-950";
+
+const headerClassName = "px-4 mb-3 flex-row items-center justify-between";
+const titleClassName =
+  "text-2xl font-semibold text-zinc-900 dark:text-zinc-100";
+
+const headerActionsClassName = "flex-row";
+const headerActionPressableClassName = "px-3 py-2";
+const headerActionTextClassName =
+  "font-semibold text-zinc-900 dark:text-zinc-100";
+
+const errorContainerClassName = "flex-1 pt-16 px-4 bg-white dark:bg-zinc-950";
+const errorTextClassName = "mt-4 text-zinc-900 dark:text-zinc-100";
+
+const bodyContentClassName = "px-4 pb-6";
+
+const primaryTextClassName = "font-semibold text-zinc-900 dark:text-zinc-100";
+const metaTextClassName = "mt-1.5 text-zinc-500 dark:text-zinc-400";
+
+const sectionClassName = "mt-4";
+const sectionLabelClassName = "text-zinc-500 dark:text-zinc-400";
+
+const photoCardClassName =
+  "mt-2.5 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900";
+
+const photoImageClassName = "w-full h-[220px] bg-zinc-200 dark:bg-zinc-800";
+const photoFooterClassName = "px-3 py-2";
+const photoPathClassName = "text-xs text-zinc-500 dark:text-zinc-400";
 
 const RecordDetailScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
@@ -107,7 +139,6 @@ const RecordDetailScreen = observer(() => {
               if (!resp.ok)
                 throw new Error(text || `Delete failed: ${resp.status}`);
 
-              // Refresh list store (best-effort) and go back
               await recordsStore.loadFirstPage(deviceId);
               router.back();
             } catch (e: any) {
@@ -121,102 +152,103 @@ const RecordDetailScreen = observer(() => {
 
   if (!deviceId) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <View className={loadingCenterClassName}>
         <ActivityIndicator />
-        <Text style={{ marginTop: 8 }}>{t("common:loading")}</Text>
+        <Text className={loadingTextClassName}>{t("common:loading")}</Text>
       </View>
     );
   }
 
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <View className={loadingCenterClassName}>
         <ActivityIndicator />
-        <Text style={{ marginTop: 8 }}>{t("common:loading")}</Text>
+        <Text className={loadingTextClassName}>{t("common:loading")}</Text>
       </View>
     );
   }
 
   if (error || !record) {
     return (
-      <View style={{ flex: 1, paddingTop: 60, paddingHorizontal: 16 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ fontSize: 22, fontWeight: "600" }}>
+      <View className={errorContainerClassName}>
+        <View className={headerClassName}>
+          <Text className={titleClassName}>
             {t("screens:recordDetail.title")}
           </Text>
-          <Pressable onPress={() => router.back()} style={{ padding: 10 }}>
-            <Text style={{ fontWeight: "600" }}>{t("common:close")}</Text>
+
+          <Pressable
+            onPress={() => router.back()}
+            className={headerActionPressableClassName}
+          >
+            <Text className={headerActionTextClassName}>
+              {t("common:close")}
+            </Text>
           </Pressable>
         </View>
 
-        <Text style={{ marginTop: 16 }}>
+        <Text className={errorTextClassName}>
           {t("common:error")}: {error ?? "Not found"}
         </Text>
       </View>
     );
   }
-  console.log(record);
 
   return (
-    <View style={{ flex: 1, paddingTop: 60 }}>
-      <View
-        style={{
-          paddingHorizontal: 16,
-          marginBottom: 12,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Text style={{ fontSize: 22, fontWeight: "600" }}>
+    <View className={screenClassName}>
+      <View className={headerClassName}>
+        <Text className={titleClassName}>
           {t("screens:recordDetail.title")}
         </Text>
 
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          <Pressable onPress={confirmDelete} style={{ padding: 10 }}>
-            <Text style={{ fontWeight: "600" }}>{t("common:delete")}</Text>
+        <View className={headerActionsClassName}>
+          <Pressable
+            onPress={confirmDelete}
+            className={headerActionPressableClassName}
+          >
+            <Text className={headerActionTextClassName}>
+              {t("common:delete")}
+            </Text>
           </Pressable>
-          <Pressable onPress={() => router.back()} style={{ padding: 10 }}>
-            <Text style={{ fontWeight: "600" }}>{t("common:close")}</Text>
+          <Pressable
+            onPress={() => router.back()}
+            className={headerActionPressableClassName}
+          >
+            <Text className={headerActionTextClassName}>
+              {t("common:close")}
+            </Text>
           </Pressable>
         </View>
       </View>
 
-      <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
-      >
-        <Text style={{ fontWeight: "600" }}>
+      <ScrollView contentContainerClassName={bodyContentClassName}>
+        <Text className={primaryTextClassName}>
           {t(`defects:${record.defectType}.label`, {
             defaultValue: record.defectType,
           })}{" "}
           • {record.severity}/5
         </Text>
 
-        <Text style={{ marginTop: 6, opacity: 0.7 }}>
+        <Text className={metaTextClassName}>
           {new Date(record.createdAt).toLocaleString("cs-CZ")}
         </Text>
 
         {record.note ? (
-          <View style={{ marginTop: 12 }}>
-            <Text style={{ opacity: 0.7 }}>
+          <View className={sectionClassName}>
+            <Text className={sectionLabelClassName}>
               {t("screens:recordDetail.note")}
             </Text>
-            <Text style={{ marginTop: 4 }}>{record.note}</Text>
+            <Text className={[primaryTextClassName, "mt-1"].join(" ")}>
+              {record.note}
+            </Text>
           </View>
         ) : null}
 
         {record.lat != null && record.lng != null ? (
-          <View style={{ marginTop: 12 }}>
-            <Text style={{ opacity: 0.7 }}>
+          <View className={sectionClassName}>
+            <Text className={sectionLabelClassName}>
               {t("screens:recordDetail.location")}
             </Text>
-            <Text style={{ marginTop: 4 }}>
+            <Text className={[primaryTextClassName, "mt-1"].join(" ")}>
               {record.lat.toFixed(5)}, {record.lng.toFixed(5)}
               {record.locationAccuracy != null
                 ? ` (±${Math.round(record.locationAccuracy)} m)`
@@ -225,29 +257,20 @@ const RecordDetailScreen = observer(() => {
           </View>
         ) : null}
 
-        <View style={{ marginTop: 12 }}>
-          <Text style={{ opacity: 0.7 }}>
+        <View className={sectionClassName}>
+          <Text className={sectionLabelClassName}>
             {t("screens:recordDetail.photos")}
           </Text>
 
           {record.photos.map((p) => (
-            <View
-              key={p.id}
-              style={{
-                marginTop: 10,
-                borderWidth: 1,
-                borderColor: "#ddd",
-                borderRadius: 12,
-                overflow: "hidden",
-              }}
-            >
+            <View key={p.id} className={photoCardClassName}>
               <Image
                 source={{ uri: resolvePhotoUrl(baseUrl, p.path) }}
-                style={{ width: "100%", height: 220, backgroundColor: "#eee" }}
+                className={photoImageClassName}
                 resizeMode="cover"
               />
-              <View style={{ padding: 10 }}>
-                <Text style={{ opacity: 0.7, fontSize: 12 }} numberOfLines={1}>
+              <View className={photoFooterClassName}>
+                <Text className={photoPathClassName} numberOfLines={1}>
                   {p.path}
                 </Text>
               </View>

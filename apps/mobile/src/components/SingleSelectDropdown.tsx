@@ -1,4 +1,41 @@
-import { Pressable, Modal, ScrollView, Text, View } from "react-native";
+import React from "react";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+
+type Option = { label: string; value: number | null };
+
+interface SingleSelectDropdownProps {
+  label: string;
+  valueLabel: string;
+  options: Option[];
+  visible: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onSelect: (value: number | null) => void;
+}
+
+const triggerClassName =
+  "flex-1 flex-row items-center justify-between rounded-xl border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900";
+
+const triggerLabelClassName = "font-semibold text-zinc-900 dark:text-zinc-100";
+const triggerValueClassName = "text-zinc-500 dark:text-zinc-400";
+
+const modalContainerClassName = "flex-1 bg-white pt-16 dark:bg-zinc-950";
+
+const modalHeaderClassName =
+  "flex-row items-center justify-between border-b border-zinc-200 px-4 pb-3 dark:border-zinc-800";
+
+const modalTitleClassName =
+  "text-lg font-semibold text-zinc-900 dark:text-zinc-100";
+
+const closePressableClassName = "px-3 py-2";
+const closeTextClassName = "font-semibold text-zinc-900 dark:text-zinc-100";
+
+const listContentClassName = "p-4";
+
+const optionPressableClassName =
+  "mb-2.5 rounded-xl border border-zinc-200 bg-white px-3 py-3 dark:border-zinc-800 dark:bg-zinc-900";
+
+const optionTextClassName = "font-semibold text-zinc-900 dark:text-zinc-100";
 
 const SingleSelectDropdown = ({
   label,
@@ -8,55 +45,25 @@ const SingleSelectDropdown = ({
   onOpen,
   onClose,
   onSelect,
-}: {
-  label: string;
-  valueLabel: string;
-  options: Array<{ label: string; value: number | null }>;
-  visible: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-  onSelect: (value: number | null) => void;
-}) => {
+}: SingleSelectDropdownProps) => {
   return (
     <>
-      <Pressable
-        onPress={onOpen}
-        style={{
-          paddingVertical: 8,
-          paddingHorizontal: 12,
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: "#ddd",
-          flex: 1,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ fontWeight: "600" }}>{label}</Text>
-        <Text style={{ opacity: 0.7 }}>{valueLabel}</Text>
+      <Pressable onPress={onOpen} className={triggerClassName}>
+        <Text className={triggerLabelClassName}>{label}</Text>
+        <Text className={triggerValueClassName}>{valueLabel}</Text>
       </Pressable>
 
       <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-        <View style={{ flex: 1, paddingTop: 60 }}>
-          <View
-            style={{
-              paddingHorizontal: 16,
-              paddingBottom: 12,
-              borderBottomWidth: 1,
-              borderBottomColor: "#eee",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontSize: 18, fontWeight: "600" }}>{label}</Text>
-            <Pressable onPress={onClose} style={{ padding: 10 }}>
-              <Text style={{ fontWeight: "600" }}>OK</Text>
+        <View className={modalContainerClassName}>
+          <View className={modalHeaderClassName}>
+            <Text className={modalTitleClassName}>{label}</Text>
+
+            <Pressable onPress={onClose} className={closePressableClassName}>
+              <Text className={closeTextClassName}>OK</Text>
             </Pressable>
           </View>
 
-          <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <ScrollView contentContainerClassName={listContentClassName}>
             {options.map((opt) => (
               <Pressable
                 key={String(opt.value)}
@@ -64,16 +71,9 @@ const SingleSelectDropdown = ({
                   onSelect(opt.value);
                   onClose();
                 }}
-                style={{
-                  paddingVertical: 12,
-                  paddingHorizontal: 12,
-                  borderWidth: 1,
-                  borderColor: "#ddd",
-                  borderRadius: 10,
-                  marginBottom: 10,
-                }}
+                className={optionPressableClassName}
               >
-                <Text style={{ fontWeight: "600" }}>{opt.label}</Text>
+                <Text className={optionTextClassName}>{opt.label}</Text>
               </Pressable>
             ))}
           </ScrollView>
