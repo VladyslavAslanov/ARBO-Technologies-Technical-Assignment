@@ -1,4 +1,8 @@
-import { ValidationPipe } from '@nestjs/common';
+import {
+  BadRequestException,
+  ValidationPipe,
+  ValidationError,
+} from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -23,11 +27,36 @@ async function bootstrap() {
     credentials: true,
   });
 
+  function flattenValidationErrors(errors: ValidationError[]) {
+    const out: Array<{ field: string; messages: string[] }> = [];
+
+    const walk = (err: ValidationError, parentPath?: string) => {
+      const field = parentPath ? `${parentPath}.${err.property}` : err.property;
+      const messages = err.constraints ? Object.values(err.constraints) : [];
+
+      if (messages.length) {
+        out.push({ field, messages });
+      }
+
+      if (err.children?.length) {
+        for (const child of err.children) walk(child, field);
+      }
+    };
+
+    for (const e of errors) walk(e);
+    return out;
+  }
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      exceptionFactory: (errors) =>
+        new BadRequestException({
+          message: 'Validation failed',
+          errors: flattenValidationErrors(errors),
+        }),
     }),
   );
 

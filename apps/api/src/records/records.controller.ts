@@ -12,7 +12,15 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiSecurity,
+  ApiTags,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as path from 'path';
@@ -24,6 +32,8 @@ import { UserId } from '../common/decorators/user-id.decorator';
 import { CreateRecordDto } from './dto/create-record.dto';
 import { ListRecordsQuery } from './dto/list-records.query';
 import { RecordsService } from './records.service';
+import { RecordDetailResponseDto } from 'apps/api/src/records/dto/responses/record-detail-response.dto';
+import { ListRecordsResponseDto } from 'apps/api/src/records/dto/responses/list-records-response.dto';
 
 function ensureDir(dirPath: string) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -106,6 +116,8 @@ export class RecordsController {
       }),
     }),
   )
+  @Post()
+  @ApiCreatedResponse({ type: RecordDetailResponseDto })
   async create(
     @UserId() userId: string,
     @Body() body: CreateRecordDto,
@@ -136,11 +148,51 @@ export class RecordsController {
   }
 
   @Get()
+  @ApiOkResponse({ type: ListRecordsResponseDto })
+  @ApiQuery({ name: 'days', required: false, enum: [7, 14, 30] })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    schema: { type: 'integer', minimum: 1, maximum: 100 },
+  })
+  @ApiQuery({
+    name: 'offset',
+    required: false,
+    schema: { type: 'integer', minimum: 0 },
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['createdAt', 'severity'],
+  })
+  @ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] })
+  @ApiQuery({
+    name: 'minSeverity',
+    required: false,
+    schema: { type: 'integer', minimum: 1, maximum: 5 },
+  })
+  @ApiQuery({
+    name: 'maxSeverity',
+    required: false,
+    schema: { type: 'integer', minimum: 1, maximum: 5 },
+  })
+  @ApiQuery({
+    name: 'hasLocation',
+    required: false,
+    schema: { type: 'boolean' },
+  })
+  @ApiQuery({
+    name: 'defectType',
+    required: false,
+    isArray: true,
+    description: 'Repeatable query param: ?defectType=A&defectType=B',
+  })
   async list(@UserId() userId: string, @Query() query: ListRecordsQuery) {
     return this.records.listRecords(userId, query);
   }
 
   @Get(':id')
+  @ApiOkResponse({ type: RecordDetailResponseDto })
   async getById(
     @UserId() userId: string,
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,

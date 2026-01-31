@@ -84,7 +84,15 @@ export class RecordsService {
         },
       });
 
-      return full;
+      return {
+        ...full,
+        recordedAt: this.toIso(full.recordedAt),
+        createdAt: full.createdAt.toISOString(),
+        photos: full.photos.map((p) => ({
+          ...p,
+          createdAt: p.createdAt.toISOString(),
+        })),
+      };
     });
   }
 
@@ -150,6 +158,7 @@ export class RecordsService {
       this.prisma.treeDefectRecord.count({ where }),
     ] as const);
 
+    const hasMore = offset + items.length < total;
     return {
       items: items.map((r) => ({
         id: r.id,
@@ -159,8 +168,8 @@ export class RecordsService {
         lat: r.lat,
         lng: r.lng,
         locationAccuracy: r.locationAccuracy,
-        recordedAt: r.recordedAt,
-        createdAt: r.createdAt,
+        recordedAt: this.toIso(r.recordedAt),
+        createdAt: r.createdAt.toISOString(),
         coverPhotoPath: r.photos[0]?.path ?? null,
         photosCount: r._count.photos,
       })),
@@ -168,6 +177,7 @@ export class RecordsService {
       limit,
       offset,
       days,
+      hasMore,
     };
   }
 
@@ -176,6 +186,10 @@ export class RecordsService {
     const uploadDir = this.config.get<string>('UPLOAD_DIR') ?? './uploads';
     const filename = path.basename(storedPath); // prevent path traversal
     return path.resolve(process.cwd(), uploadDir, filename);
+  }
+
+  private toIso(d: Date | null | undefined): string | null {
+    return d ? d.toISOString() : null;
   }
 
   async getRecordById(userId: string, id: string) {
@@ -199,7 +213,15 @@ export class RecordsService {
       throw new NotFoundException('Record not found');
     }
 
-    return record;
+    return {
+      ...record,
+      recordedAt: this.toIso(record.recordedAt),
+      createdAt: record.createdAt.toISOString(),
+      photos: record.photos.map((p) => ({
+        ...p,
+        createdAt: p.createdAt.toISOString(),
+      })),
+    };
   }
   async deleteRecord(userId: string, id: string) {
     // Load photo paths before DB deletion
