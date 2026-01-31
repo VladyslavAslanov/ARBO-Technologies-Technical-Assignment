@@ -1,4 +1,34 @@
 {
   "DEAD_WOOD": { "label": "Suché větve", "description": "" },
-  "CRACKS": { "label": "Trhliny", "description": "" }
+  "CRACKS": { "label": "Trhliny", "description": "" },
+  "WEAK_UNION_INCLUDED_BARK": {
+    "label": "Slabé větvení / zarostlá kůra",
+    "description": ""
+  },
+  "HEARTWOOD_DECAY": { "label": "Hniloba jádrového dřeva", "description": "" },
+  "SAPWOOD_DAMAGE_DECAY": {
+    "label": "Poškození / hniloba bělového dřeva",
+    "description": ""
+  },
+  "CAVITY_HOLLOW": { "label": "Dutina", "description": "" },
+  "CONKS_MUSHROOMS": {
+    "label": "Dřevokazné houby (plodnice)",
+    "description": ""
+  },
+  "CANKERS_GALLS_BURLS": {
+    "label": "Nádory / boulovce / zduřeniny",
+    "description": ""
+  },
+  "ROOT_PROBLEMS": { "label": "Problémy kořenů", "description": "" },
+  "ROOT_PLATE_LIFTING": {
+    "label": "Nadzvednutí kořenové desky",
+    "description": ""
+  },
+  "LEAN": { "label": "Naklonění", "description": "" },
+  "POOR_ARCHITECTURE": {
+    "label": "Nevhodná architektura koruny",
+    "description": ""
+  },
+  "LIGHTNING_DAMAGE": { "label": "Poškození bleskem", "description": "" },
+  "SAP_OOZE": { "label": "Výtok mízy", "description": "" }
 }

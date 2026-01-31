@@ -6,8 +6,14 @@ import { StoresContext, rootStore } from "../core/rootStore";
 
 export default function RootLayout() {
   useEffect(() => {
-    // Initialize session once on app start
     rootStore.sessionStore.init();
+    const run = async () => {
+      await rootStore.sessionStore.init();
+      if (rootStore.sessionStore.deviceId) {
+        await rootStore.defectTypesStore.load(rootStore.sessionStore.deviceId);
+      }
+    };
+    run();
   }, []);
 
   return (

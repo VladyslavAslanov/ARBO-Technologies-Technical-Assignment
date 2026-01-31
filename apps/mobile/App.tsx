@@ -7,7 +7,6 @@ import { RecordsScreen } from "./src/screens/RecordsScreen";
 export default function App() {
   useEffect(() => {
     rootStore.sessionStore.init();
-    console.log(rootStore.sessionStore.init());
   }, []);
 
   return (

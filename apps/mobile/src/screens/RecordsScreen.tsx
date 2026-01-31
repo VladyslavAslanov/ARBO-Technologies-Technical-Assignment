@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useStores } from "../core/rootStore";
 
 export const RecordsScreen = observer(() => {
-  const { t } = useTranslation(["screens", "common"]);
+  const { t } = useTranslation(["screens", "common", "defects"]);
   const { sessionStore, recordsStore } = useStores();
 
   console.log(sessionStore.deviceId);
@@ -106,7 +106,10 @@ export const RecordsScreen = observer(() => {
               }}
             >
               <Text style={{ fontWeight: "600" }}>
-                {item.defectType} • {item.severity}/5
+                {t(`defects:${item.defectType}.label`, {
+                  defaultValue: item.defectType,
+                })}{" "}
+                • {item.severity}/5
               </Text>
               <Text style={{ marginTop: 4 }}>
                 {new Date(item.createdAt).toLocaleString("cs-CZ")}
