@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
+import { NestExpressApplication } from '@nestjs/platform-express';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -12,19 +13,16 @@ function ensureDir(dirPath: string) {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config = app.get(ConfigService);
 
-  // Global prefix /api
   app.setGlobalPrefix('api');
 
-  // CORS (for Expo/external clients; does not interfere)
   app.enableCors({
     origin: true,
     credentials: true,
   });
 
-  // Strict validation of DTO
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -33,7 +31,6 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger /docs (NOT prefixed with /api)
   const swaggerConfig = new DocumentBuilder()
     .setTitle('TreeFeatureCollector API')
     .setDescription('Local REST API for demo (mock server logic)')
@@ -47,14 +44,20 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document);
 
-  // Ensure folders for SQLite and uploads
   const uploadDir = config.get<string>('UPLOAD_DIR') ?? './uploads';
+
+  // Ensure local directories exist
   ensureDir(path.resolve(process.cwd(), 'data'));
   ensureDir(path.resolve(process.cwd(), uploadDir));
 
+  // Serve uploaded files from /uploads (not under /api)
+  app.useStaticAssets(path.resolve(process.cwd(), uploadDir), {
+    prefix: '/uploads',
+  });
+
   const port = Number(config.get<string>('PORT') ?? 3000);
 
-  // Important for access with iPhone by IP: listen on 0.0.0.0
+  // Listen on 0.0.0.0 to allow access from a real device
   await app.listen(port, '0.0.0.0');
 }
 
