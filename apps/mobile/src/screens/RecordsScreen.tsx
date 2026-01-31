@@ -130,122 +130,26 @@ export const RecordsScreen = observer(() => {
       <View className={headerClassName}>
         <Text className={titleClassName}>{t("screens:records.title")}</Text>
 
-        <Pressable
-          onPress={() => router.push("/create")}
-          className={addButtonClassName}
-        >
-          <Text className={addButtonTextClassName}>+</Text>
-        </Pressable>
-      </View>
+        <View className="flex-row gap-2">
+          <Pressable
+            onPress={() => router.push("/filters")}
+            className="h-10 w-10 items-center justify-center rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white/60 dark:bg-zinc-900/60"
+            hitSlop={10}
+          >
+            <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              ⚙︎
+            </Text>
+          </Pressable>
 
-      <View className="px-4 mb-2.5">
-        <DefectTypeDropdown
-          label={t("screens:records.filters.defectType")}
-          items={defectTypesStore.items}
-          selected={recordsStore.selectedDefectTypes}
-          onToggle={(k) => recordsStore.toggleDefectType(k)}
-          onClear={() => recordsStore.clearDefectTypes()}
-          visible={defectsOpen}
-          onOpen={() => setDefectsOpen(true)}
-          onClose={() => setDefectsOpen(false)}
-          renderLabel={(key) =>
-            t(`defects:${key}.label`, { defaultValue: key })
-          }
-          tSelected={t("screens:records.filters.selected")}
-          tAll={t("screens:records.filters.allDefects")}
-          tClose={t("screens:records.filters.close")}
-          tClear={t("screens:records.filters.clear")}
-        />
-
-        <View className="mt-3">
-          <Text className={sectionLabelClassName}>
-            {t("screens:records.filters.days")}
-          </Text>
-          <View className={[rowClassName, "mb-2.5"].join(" ")}>
-            <PillButton
-              label="7"
-              active={recordsStore.days === 7}
-              onPress={() => recordsStore.setDays(7)}
-            />
-            <PillButton
-              label="14"
-              active={recordsStore.days === 14}
-              onPress={() => recordsStore.setDays(14)}
-            />
-            <PillButton
-              label="30"
-              active={recordsStore.days === 30}
-              onPress={() => recordsStore.setDays(30)}
-            />
-          </View>
-
-          <Text className={sectionLabelClassName}>
-            {t("screens:records.filters.sort")}
-          </Text>
-          <View className={[rowClassName, "mb-2.5"].join(" ")}>
-            <PillButton
-              label={t("screens:records.filters.sortCreatedAt")}
-              active={recordsStore.sortBy === "createdAt"}
-              onPress={() => recordsStore.setSortBy("createdAt")}
-            />
-            <PillButton
-              label={t("screens:records.filters.sortSeverity")}
-              active={recordsStore.sortBy === "severity"}
-              onPress={() => recordsStore.setSortBy("severity")}
-            />
-            <PillButton
-              label={recordsStore.order.toUpperCase()}
-              active={true}
-              onPress={() => recordsStore.toggleOrder()}
-            />
-          </View>
-
-          <Text className={sectionLabelClassName}>
-            {t("screens:records.filters.severity")}
-          </Text>
-          <View className={severityRowClassName}>
-            <SingleSelectDropdown
-              label={t("screens:records.filters.min")}
-              valueLabel={
-                recordsStore.minSeverity == null
-                  ? t("screens:records.filters.any")
-                  : String(recordsStore.minSeverity)
-              }
-              options={[
-                { label: t("screens:records.filters.any"), value: null },
-                { label: "1", value: 1 },
-                { label: "2", value: 2 },
-                { label: "3", value: 3 },
-                { label: "4", value: 4 },
-                { label: "5", value: 5 },
-              ]}
-              visible={minOpen}
-              onOpen={() => setMinOpen(true)}
-              onClose={() => setMinOpen(false)}
-              onSelect={(v) => recordsStore.setMinSeverity(v)}
-            />
-
-            <SingleSelectDropdown
-              label={t("screens:records.filters.max")}
-              valueLabel={
-                recordsStore.maxSeverity == null
-                  ? t("screens:records.filters.any")
-                  : String(recordsStore.maxSeverity)
-              }
-              options={[
-                { label: t("screens:records.filters.any"), value: null },
-                { label: "1", value: 1 },
-                { label: "2", value: 2 },
-                { label: "3", value: 3 },
-                { label: "4", value: 4 },
-                { label: "5", value: 5 },
-              ]}
-              visible={maxOpen}
-              onOpen={() => setMaxOpen(true)}
-              onClose={() => setMaxOpen(false)}
-              onSelect={(v) => recordsStore.setMaxSeverity(v)}
-            />
-          </View>
+          <Pressable
+            onPress={() => router.push("/create")}
+            className="h-10 w-10 items-center justify-center rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white/60 dark:bg-zinc-900/60"
+            hitSlop={10}
+          >
+            <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              +
+            </Text>
+          </Pressable>
         </View>
       </View>
 

@@ -129,20 +129,10 @@ async function normalizeToJpeg(
   return { uri: currentUri, mimeType: "image/jpeg" };
 }
 
-function parseApiErrorMessage(raw: string): string {
-  if (!raw) return "Request failed";
-
-  try {
-    const data = JSON.parse(raw);
-    const msg = (data?.message ?? data?.error ?? data) as unknown;
-
-    if (Array.isArray(msg)) return msg.join("\n");
-    if (typeof msg === "string") return msg;
-
-    return raw;
-  } catch {
-    return raw;
-  }
+async function getFileSizeBytes(uri: string): Promise<number> {
+  const res = await fetch(uri);
+  const blob = await res.blob();
+  return blob.size;
 }
 
 function parseApiErrorMessage(raw: string): string {

@@ -115,6 +115,15 @@ export class RecordsStore {
     this.selectedDefectTypes = [];
   }
 
+  resetFilters() {
+    this.selectedDefectTypes = [];
+    this.days = 30;
+    this.sortBy = "createdAt";
+    this.order = "desc";
+    this.minSeverity = null;
+    this.maxSeverity = null;
+  }
+
   private buildQuery() {
     const params = new URLSearchParams();
     params.set("days", String(this.days));
