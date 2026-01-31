@@ -15,9 +15,10 @@ import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 
-import { useStores } from "../core/rootStore";
-import { getCurrentLocation } from "../services/locationService";
-import PillButton from "../components/PillButton";
+import { useStores } from "../../core/rootStore";
+import { getCurrentLocation } from "../../services/locationService";
+import PillButton from "../../components/PillButton/PillButton";
+import { createRecordScreenStyles } from "./CreateRecordScreenStyles";
 
 type PickedPhoto = {
   uri: string;
@@ -29,70 +30,6 @@ type PickedPhoto = {
 
 const maxPhotos = 10;
 const maxBytes = 5 * 1024 * 1024;
-
-const loadingCenterClassName = "flex-1 items-center justify-center";
-const loadingTextClassName = "mt-2 text-zinc-500 dark:text-zinc-400";
-
-const screenClassName = "flex-1 pt-16 bg-white dark:bg-zinc-950";
-
-const headerClassName = "px-4 mb-3 flex-row items-center justify-between";
-const titleClassName =
-  "text-2xl font-semibold text-zinc-900 dark:text-zinc-100";
-
-const headerActionPressableClassName = "px-3 py-2";
-const headerActionTextClassName =
-  "font-semibold text-zinc-900 dark:text-zinc-100";
-
-const contentClassName = "p-4 pb-6";
-
-const labelClassName = "mb-1.5 text-zinc-500 dark:text-zinc-400";
-const sectionSpacerClassName = "mt-4";
-
-const listContainerClassName =
-  "rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900";
-
-const listItemBaseClassName = "px-3 py-3";
-const listItemDividerClassName =
-  "border-t border-zinc-200 dark:border-zinc-800";
-const listItemActiveClassName = "bg-zinc-200 dark:bg-zinc-800";
-const listItemInactiveClassName = "bg-transparent";
-
-const listItemTextBaseClassName = "font-semibold";
-const listItemTextActiveClassName = "text-dark dark:text-zinc-200";
-const listItemTextInactiveClassName = "text-zinc-900 dark:text-zinc-100";
-
-const inputClassName =
-  "rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-3 text-zinc-900 dark:text-zinc-100";
-
-const photoButtonsRowClassName = "flex-row gap-2.5";
-const photoButtonClassName =
-  "flex-1 items-center rounded-xl border border-zinc-900 dark:border-zinc-100 py-3";
-const photoButtonTextClassName =
-  "font-semibold text-zinc-900 dark:text-zinc-100";
-
-const photoGridClassName = "mt-3 flex-row flex-wrap gap-2.5";
-
-const photoTileClassName =
-  "w-[110px] h-[110px] rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-200 dark:bg-zinc-800";
-
-const photoTileImageClassName = "w-full h-full";
-
-const removeBadgeClassName =
-  "absolute top-1.5 right-1.5 rounded-full bg-black/60 px-2 py-0.5";
-const removeBadgeTextClassName = "text-white font-semibold text-xs";
-
-const gpsHintClassName = "mt-2 text-xs text-zinc-500 dark:text-zinc-400";
-
-const submitButtonBaseClassName = "mt-4 rounded-xl py-3.5 items-center";
-const submitButtonEnabledClassName = "bg-zinc-900 dark:bg-zinc-100";
-const submitButtonDisabledClassName = "bg-zinc-200 dark:bg-zinc-800";
-
-const submitTextEnabledClassName =
-  "font-semibold text-white dark:text-zinc-900";
-const submitTextDisabledClassName =
-  "font-semibold text-zinc-500 dark:text-zinc-400";
-
-const limitHintClassName = "mt-2 text-xs text-zinc-500 dark:text-zinc-400";
 
 async function ensureCameraPermission() {
   const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -366,9 +303,11 @@ export const CreateRecordScreen = observer(() => {
 
   if (!deviceId) {
     return (
-      <View className={loadingCenterClassName}>
+      <View className={createRecordScreenStyles.loadingCenter}>
         <ActivityIndicator />
-        <Text className={loadingTextClassName}>{t("common:loading")}</Text>
+        <Text className={createRecordScreenStyles.loadingText}>
+          {t("common:loading")}
+        </Text>
       </View>
     );
   }
@@ -376,51 +315,55 @@ export const CreateRecordScreen = observer(() => {
   const defectOptions = defectTypesStore.items;
 
   const submitButtonClassName = [
-    submitButtonBaseClassName,
-    canSubmit ? submitButtonEnabledClassName : submitButtonDisabledClassName,
+    createRecordScreenStyles.submitButton.base,
+    canSubmit
+      ? createRecordScreenStyles.submitButton.enabled
+      : createRecordScreenStyles.submitButton.disabled,
   ].join(" ");
 
   const submitTextClassName = canSubmit
-    ? submitTextEnabledClassName
-    : submitTextDisabledClassName;
+    ? createRecordScreenStyles.submitText.enabled
+    : createRecordScreenStyles.submitText.disabled;
 
   return (
-    <View className={screenClassName}>
-      <View className={headerClassName}>
-        <Text className={titleClassName}>
+    <View className={createRecordScreenStyles.screen}>
+      <View className={createRecordScreenStyles.header}>
+        <Text className={createRecordScreenStyles.title}>
           {t("screens:create.title", { defaultValue: "Nový záznam" })}
         </Text>
 
         <Pressable
           onPress={() => router.back()}
-          className={headerActionPressableClassName}
+          className={createRecordScreenStyles.headerActionPressable}
         >
-          <Text className={headerActionTextClassName}>
+          <Text className={createRecordScreenStyles.headerActionText}>
             {t("common:close", { defaultValue: "Zavřít" })}
           </Text>
         </Pressable>
       </View>
 
-      <ScrollView contentContainerClassName={contentClassName}>
-        <Text className={labelClassName}>
+      <ScrollView contentContainerClassName={createRecordScreenStyles.content}>
+        <Text className={createRecordScreenStyles.label}>
           {t("screens:create.defectType", { defaultValue: "Defekt" })}
         </Text>
 
-        <View className={listContainerClassName}>
+        <View className={createRecordScreenStyles.listContainer}>
           {defectOptions.map((it, idx) => {
             const active = defectType === it.key;
 
             const itemClassName = [
-              listItemBaseClassName,
-              idx === 0 ? "" : listItemDividerClassName,
-              active ? listItemActiveClassName : listItemInactiveClassName,
+              createRecordScreenStyles.listItem.base,
+              idx === 0 ? "" : createRecordScreenStyles.listItem.divider,
+              active
+                ? createRecordScreenStyles.listItem.active
+                : createRecordScreenStyles.listItem.inactive,
             ].join(" ");
 
             const itemTextClassName = [
-              listItemTextBaseClassName,
+              createRecordScreenStyles.listItemText.base,
               active
-                ? listItemTextActiveClassName
-                : listItemTextInactiveClassName,
+                ? createRecordScreenStyles.listItemText.active
+                : createRecordScreenStyles.listItemText.inactive,
             ].join(" ");
 
             return (
@@ -437,8 +380,8 @@ export const CreateRecordScreen = observer(() => {
           })}
         </View>
 
-        <View className={sectionSpacerClassName}>
-          <Text className={labelClassName}>
+        <View className={createRecordScreenStyles.sectionSpacer}>
+          <Text className={createRecordScreenStyles.label}>
             {t("screens:create.severity", { defaultValue: "Závažnost (1–5)" })}
           </Text>
 
@@ -454,8 +397,8 @@ export const CreateRecordScreen = observer(() => {
           </View>
         </View>
 
-        <View className={sectionSpacerClassName}>
-          <Text className={labelClassName}>
+        <View className={createRecordScreenStyles.sectionSpacer}>
+          <Text className={createRecordScreenStyles.label}>
             {t("screens:create.note", { defaultValue: "Poznámka" })}
           </Text>
 
@@ -466,27 +409,27 @@ export const CreateRecordScreen = observer(() => {
               defaultValue: "Volitelné…",
             })}
             placeholderTextColor="#71717a"
-            className={inputClassName}
+            className={createRecordScreenStyles.input}
             multiline
           />
         </View>
 
-        <View className={sectionSpacerClassName}>
-          <Text className={labelClassName}>
+        <View className={createRecordScreenStyles.sectionSpacer}>
+          <Text className={createRecordScreenStyles.label}>
             {t("screens:create.photos", { defaultValue: "Fotky" })} (
             {photos.length}/{maxPhotos})
           </Text>
 
-          <View className={photoButtonsRowClassName}>
+          <View className={createRecordScreenStyles.photoButtonsRow}>
             <Pressable
               onPress={takePhoto}
               disabled={submitting}
               className={[
-                photoButtonClassName,
+                createRecordScreenStyles.photoButton,
                 submitting ? "opacity-50" : "",
               ].join(" ")}
             >
-              <Text className={photoButtonTextClassName}>
+              <Text className={createRecordScreenStyles.photoButtonText}>
                 {t("screens:create.takePhoto", {
                   defaultValue: "Sfotografovat",
                 })}
@@ -495,9 +438,13 @@ export const CreateRecordScreen = observer(() => {
 
             <Pressable
               onPress={pickFromLibrary}
-              className={photoButtonClassName}
+              disabled={submitting}
+              className={[
+                createRecordScreenStyles.photoButton,
+                submitting ? "opacity-50" : "",
+              ].join(" ")}
             >
-              <Text className={photoButtonTextClassName}>
+              <Text className={createRecordScreenStyles.photoButtonText}>
                 {t("screens:create.pickFromGallery", {
                   defaultValue: "Vybrat z galerie",
                 })}
@@ -506,34 +453,38 @@ export const CreateRecordScreen = observer(() => {
           </View>
 
           {photos.length > 0 ? (
-            <View className={photoGridClassName}>
+            <View className={createRecordScreenStyles.photoGrid}>
               {photos.map((p, idx) => (
                 <Pressable
                   key={`${p.uri}-${idx}`}
                   onPress={() => removePhotoAt(idx)}
                   disabled={submitting}
                   className={[
-                    photoTileClassName,
+                    createRecordScreenStyles.photoTile,
                     submitting ? "opacity-70" : "",
                   ].join(" ")}
                 >
                   <Image
                     source={{ uri: p.uri }}
-                    className={photoTileImageClassName}
+                    className={createRecordScreenStyles.photoTileImage}
                     resizeMode="cover"
                   />
 
-                  <View className={removeBadgeClassName}>
-                    <Text className={removeBadgeTextClassName}>×</Text>
+                  <View className={createRecordScreenStyles.removeBadge}>
+                    <Text className={createRecordScreenStyles.removeBadgeText}>
+                      ×
+                    </Text>
                   </View>
                 </Pressable>
               ))}
             </View>
           ) : null}
 
-          <Text className={gpsHintClassName}>
+          <Text className={createRecordScreenStyles.gpsHint}>
             {location
-              ? `GPS: ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)} (±${location.accuracy ?? "—"} m)`
+              ? `GPS: ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)} (±${
+                  location.accuracy ?? "—"
+                } m)`
               : "GPS: —"}
           </Text>
 
@@ -551,7 +502,7 @@ export const CreateRecordScreen = observer(() => {
             )}
           </Pressable>
 
-          <Text className={limitHintClassName}>
+          <Text className={createRecordScreenStyles.limitHint}>
             {t("screens:create.photoLimits", {
               defaultValue:
                 "Limit: max 10 fotek, každá do 5 MB (po převodu do JPEG).",

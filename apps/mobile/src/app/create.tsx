@@ -1,5 +1,5 @@
 import React from "react";
-import { CreateRecordScreen } from "../screens/CreateRecordScreen";
+import { CreateRecordScreen } from "../screens/CreateRecordScreen/CreateRecordScreen";
 
 const Create = () => {
   return <CreateRecordScreen />;

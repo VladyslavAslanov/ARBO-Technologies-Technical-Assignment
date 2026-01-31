@@ -12,56 +12,12 @@ import { useRouter, useFocusEffect } from "expo-router";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 
-import { useStores } from "../core/rootStore";
-import PillButton from "../components/PillButton";
-import DefectTypeDropdown from "../components/DefectTypeDropdown";
-import SingleSelectDropdown from "../components/SingleSelectDropdown";
-
-const screenClassName = "flex-1 pt-16 bg-white dark:bg-zinc-950";
-
-const headerClassName = "px-4 mb-3 flex-row items-center justify-between";
-
-const titleClassName =
-  "text-2xl font-semibold text-zinc-900 dark:text-zinc-100";
-
-const addButtonClassName =
-  "rounded-xl border border-zinc-900 dark:border-zinc-100 px-3 py-2";
-const addButtonTextClassName = "font-semibold text-zinc-900 dark:text-zinc-100";
-
-const sectionClassName = "px-4 mb-2.5";
-const sectionLabelClassName = "mb-1.5 text-zinc-500 dark:text-zinc-400";
-
-const rowClassName = "flex-row";
-
-const severityRowClassName = "flex-row gap-2.5";
-
-const hintClassName = "px-4 mb-2 text-zinc-500 dark:text-zinc-400";
-
-const errorBoxClassName = "px-4 mb-2";
-const errorTextClassName = "text-zinc-900 dark:text-zinc-100";
-
-const emptyClassName = "flex-1 items-center justify-center";
-const emptyTextClassName = "text-zinc-500 dark:text-zinc-400";
-
-const listContentStyle = { paddingHorizontal: 16, paddingBottom: 24 };
-
-const cardPressableClassName = "mb-2.5";
-const cardClassName =
-  "rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3";
-
-const cardRowClassName = "flex-row gap-3";
-const thumbClassName =
-  "w-[72px] h-[72px] rounded-xl bg-zinc-200 dark:bg-zinc-800";
-
-const cardTitleClassName = "font-semibold text-zinc-900 dark:text-zinc-100";
-const cardMetaClassName = "mt-1 text-zinc-500 dark:text-zinc-400";
-
-const loadingCenterClassName = "flex-1 items-center justify-center";
-const loadingTextClassName = "mt-2 text-zinc-500 dark:text-zinc-400";
+import { useStores } from "../../core/rootStore";
+import { recordsScreenStyles } from "./RecordsScreenStyles";
 
 export const RecordsScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
-  const { sessionStore, recordsStore, defectTypesStore } = useStores();
+  const { sessionStore, recordsStore } = useStores();
   const router = useRouter();
 
   const [defectsOpen, setDefectsOpen] = useState(false);
@@ -103,17 +59,19 @@ export const RecordsScreen = observer(() => {
 
   if (!sessionStore.isReady) {
     return (
-      <View className={loadingCenterClassName}>
+      <View className={recordsScreenStyles.loading.center}>
         <ActivityIndicator />
-        <Text className={loadingTextClassName}>{t("common:loading")}</Text>
+        <Text className={recordsScreenStyles.loading.text}>
+          {t("common:loading")}
+        </Text>
       </View>
     );
   }
 
   if (sessionStore.error) {
     return (
-      <View className="flex-1 justify-center px-4 bg-white dark:bg-zinc-950">
-        <Text className={errorTextClassName}>
+      <View className={recordsScreenStyles.error.container}>
+        <Text className={recordsScreenStyles.error.text}>
           {t("common:error")}: {sessionStore.error}
         </Text>
       </View>
@@ -126,44 +84,42 @@ export const RecordsScreen = observer(() => {
     !isInitialLoading && !recordsStore.error && recordsStore.items.length === 0;
 
   return (
-    <View className={screenClassName}>
-      <View className={headerClassName}>
-        <Text className={titleClassName}>{t("screens:records.title")}</Text>
+    <View className={recordsScreenStyles.screen}>
+      <View className={recordsScreenStyles.header.container}>
+        <Text className={recordsScreenStyles.header.title}>
+          {t("screens:records.title")}
+        </Text>
 
-        <View className="flex-row gap-2">
+        <View className={recordsScreenStyles.header.actionsRow}>
           <Pressable
             onPress={() => router.push("/filters")}
-            className="h-10 w-10 items-center justify-center rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white/60 dark:bg-zinc-900/60"
+            className={recordsScreenStyles.header.iconButton}
             hitSlop={10}
           >
-            <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              ⚙︎
-            </Text>
+            <Text className={recordsScreenStyles.header.iconText}>⚙︎</Text>
           </Pressable>
 
           <Pressable
             onPress={() => router.push("/create")}
-            className="h-10 w-10 items-center justify-center rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white/60 dark:bg-zinc-900/60"
+            className={recordsScreenStyles.header.iconButton}
             hitSlop={10}
           >
-            <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              +
-            </Text>
+            <Text className={recordsScreenStyles.header.iconText}>+</Text>
           </Pressable>
         </View>
       </View>
 
       {!!recordsStore.error ? (
-        <View className={errorBoxClassName}>
-          <Text className={errorTextClassName}>
+        <View className={recordsScreenStyles.error.container}>
+          <Text className={recordsScreenStyles.error.text}>
             {t("common:error")}: {recordsStore.error}
           </Text>
         </View>
       ) : null}
 
       {isEmpty ? (
-        <View className={emptyClassName}>
-          <Text className={emptyTextClassName}>
+        <View className={recordsScreenStyles.empty.container}>
+          <Text className={recordsScreenStyles.empty.text}>
             {t("screens:records.empty")}
           </Text>
         </View>
@@ -171,7 +127,7 @@ export const RecordsScreen = observer(() => {
         <FlatList
           data={recordsStore.items}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={listContentStyle}
+          contentContainerStyle={recordsScreenStyles.list.contentContainerStyle}
           refreshControl={
             <RefreshControl
               refreshing={recordsStore.loading && recordsStore.offset === 0}
@@ -182,7 +138,7 @@ export const RecordsScreen = observer(() => {
           onEndReached={() => recordsStore.loadNextPage(deviceId)}
           ListFooterComponent={
             recordsStore.loading && recordsStore.offset > 0 ? (
-              <View className="py-4">
+              <View className={recordsScreenStyles.list.footerLoadingWrapper}>
                 <ActivityIndicator />
               </View>
             ) : null
@@ -195,33 +151,33 @@ export const RecordsScreen = observer(() => {
             return (
               <Pressable
                 onPress={() => router.push(`/records/${item.id}`)}
-                className={cardPressableClassName}
+                className={recordsScreenStyles.card.pressable}
               >
-                <View className={cardClassName}>
-                  <View className={cardRowClassName}>
+                <View className={recordsScreenStyles.card.container}>
+                  <View className={recordsScreenStyles.card.row}>
                     {coverUri ? (
                       <Image
                         source={{ uri: coverUri }}
-                        className={thumbClassName}
+                        className={recordsScreenStyles.card.thumb}
                         resizeMode="cover"
                       />
                     ) : (
-                      <View className={thumbClassName} />
+                      <View className={recordsScreenStyles.card.thumb} />
                     )}
 
                     <View className="flex-1">
-                      <Text className={cardTitleClassName}>
+                      <Text className={recordsScreenStyles.card.title}>
                         {t(`defects:${item.defectType}.label`, {
                           defaultValue: item.defectType,
                         })}{" "}
                         • {item.severity}/5
                       </Text>
 
-                      <Text className={cardMetaClassName}>
+                      <Text className={recordsScreenStyles.card.meta}>
                         {new Date(item.createdAt).toLocaleString("cs-CZ")}
                       </Text>
 
-                      <Text className={cardMetaClassName}>
+                      <Text className={recordsScreenStyles.card.meta}>
                         photos: {item.photosCount}
                       </Text>
                     </View>

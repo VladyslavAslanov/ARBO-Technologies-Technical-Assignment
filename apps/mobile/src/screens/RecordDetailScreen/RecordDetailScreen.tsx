@@ -12,7 +12,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 
-import { useStores } from "../core/rootStore";
+import { useStores } from "../../core/rootStore";
+import { recordDetailScreenStyles } from "./RecordDetailScreenStyles";
 
 type RecordPhoto = {
   id: string;
@@ -53,42 +54,6 @@ function parseApiErrorMessage(raw: string): string {
     return raw;
   }
 }
-
-const loadingCenterClassName = "flex-1 items-center justify-center";
-const loadingTextClassName = "mt-2 text-zinc-500 dark:text-zinc-400";
-
-const screenClassName = "flex-1 pt-16 bg-white dark:bg-zinc-950";
-
-const headerClassName = "px-4 mb-3 flex-row items-center justify-between";
-const titleClassName =
-  "text-2xl font-semibold text-zinc-900 dark:text-zinc-100";
-
-const headerActionsClassName = "flex-row gap-2";
-const headerActionPressableClassName = "px-3 py-2";
-const headerActionTextClassName =
-  "font-semibold text-zinc-900 dark:text-zinc-100";
-
-const errorContainerClassName = "flex-1 pt-16 px-4 bg-white dark:bg-zinc-950";
-const errorTextClassName = "mt-4 text-zinc-900 dark:text-zinc-100";
-
-const bodyContentClassName = "px-4 pb-6";
-
-const primaryTextClassName = "font-semibold text-zinc-900 dark:text-zinc-100";
-const metaTextClassName = "mt-1.5 text-zinc-500 dark:text-zinc-400";
-
-const sectionClassName = "mt-4";
-const sectionLabelClassName = "text-zinc-500 dark:text-zinc-400";
-
-const emptyPhotosClassName =
-  "mt-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-3";
-const emptyPhotosTextClassName = "text-zinc-500 dark:text-zinc-400";
-
-const photoCardClassName =
-  "mt-2.5 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900";
-
-const photoImageClassName = "w-full h-[220px] bg-zinc-200 dark:bg-zinc-800";
-const photoFooterClassName = "px-3 py-2";
-const photoPathClassName = "text-xs text-zinc-500 dark:text-zinc-400";
 
 const RecordDetailScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
@@ -169,43 +134,37 @@ const RecordDetailScreen = observer(() => {
     );
   };
 
-  if (!deviceId) {
-    return (
-      <View className={loadingCenterClassName}>
-        <ActivityIndicator />
-        <Text className={loadingTextClassName}>{t("common:loading")}</Text>
-      </View>
-    );
-  }
+  const LoadingView = () => (
+    <View className={recordDetailScreenStyles.loading.center}>
+      <ActivityIndicator />
+      <Text className={recordDetailScreenStyles.loading.text}>
+        {t("common:loading")}
+      </Text>
+    </View>
+  );
 
-  if (loading) {
-    return (
-      <View className={loadingCenterClassName}>
-        <ActivityIndicator />
-        <Text className={loadingTextClassName}>{t("common:loading")}</Text>
-      </View>
-    );
-  }
+  if (!deviceId) return <LoadingView />;
+  if (loading) return <LoadingView />;
 
   if (error || !record) {
     return (
-      <View className={errorContainerClassName}>
-        <View className={headerClassName}>
-          <Text className={titleClassName}>
+      <View className={recordDetailScreenStyles.error.container}>
+        <View className={recordDetailScreenStyles.header.container}>
+          <Text className={recordDetailScreenStyles.header.title}>
             {t("screens:recordDetail.title")}
           </Text>
 
           <Pressable
             onPress={() => router.back()}
-            className={headerActionPressableClassName}
+            className={recordDetailScreenStyles.header.actionPressable}
           >
-            <Text className={headerActionTextClassName}>
+            <Text className={recordDetailScreenStyles.header.actionText}>
               {t("common:close")}
             </Text>
           </Pressable>
         </View>
 
-        <Text className={errorTextClassName}>
+        <Text className={recordDetailScreenStyles.error.text}>
           {t("common:error")}: {error ?? "Not found"}
         </Text>
       </View>
@@ -213,62 +172,74 @@ const RecordDetailScreen = observer(() => {
   }
 
   return (
-    <View className={screenClassName}>
-      <View className={headerClassName}>
-        <Text className={titleClassName}>
+    <View className={recordDetailScreenStyles.screen}>
+      <View className={recordDetailScreenStyles.header.container}>
+        <Text className={recordDetailScreenStyles.header.title}>
           {t("screens:recordDetail.title")}
         </Text>
 
-        <View className={headerActionsClassName}>
+        <View className={recordDetailScreenStyles.header.actionsRow}>
           <Pressable
             onPress={confirmDelete}
-            className={headerActionPressableClassName}
+            className={recordDetailScreenStyles.header.actionPressable}
           >
-            <Text className={headerActionTextClassName}>
+            <Text className={recordDetailScreenStyles.header.actionText}>
               {t("common:delete")}
             </Text>
           </Pressable>
 
           <Pressable
             onPress={() => router.back()}
-            className={headerActionPressableClassName}
+            className={recordDetailScreenStyles.header.actionPressable}
           >
-            <Text className={headerActionTextClassName}>
+            <Text className={recordDetailScreenStyles.header.actionText}>
               {t("common:close")}
             </Text>
           </Pressable>
         </View>
       </View>
 
-      <ScrollView contentContainerClassName={bodyContentClassName}>
-        <Text className={primaryTextClassName}>
+      <ScrollView
+        contentContainerClassName={recordDetailScreenStyles.body.content}
+      >
+        <Text className={recordDetailScreenStyles.text.primary}>
           {t(`defects:${record.defectType}.label`, {
             defaultValue: record.defectType,
           })}{" "}
           • {record.severity}/5
         </Text>
 
-        <Text className={metaTextClassName}>
+        <Text className={recordDetailScreenStyles.text.meta}>
           {new Date(record.createdAt).toLocaleString("cs-CZ")}
         </Text>
 
         {record.note ? (
-          <View className={sectionClassName}>
-            <Text className={sectionLabelClassName}>
+          <View className={recordDetailScreenStyles.section.wrapper}>
+            <Text className={recordDetailScreenStyles.text.sectionLabel}>
               {t("screens:recordDetail.note")}
             </Text>
-            <Text className={[primaryTextClassName, "mt-1"].join(" ")}>
+            <Text
+              className={[
+                recordDetailScreenStyles.text.primary,
+                recordDetailScreenStyles.section.noteTextSpacing,
+              ].join(" ")}
+            >
               {record.note}
             </Text>
           </View>
         ) : null}
 
         {record.lat != null && record.lng != null ? (
-          <View className={sectionClassName}>
-            <Text className={sectionLabelClassName}>
+          <View className={recordDetailScreenStyles.section.wrapper}>
+            <Text className={recordDetailScreenStyles.text.sectionLabel}>
               {t("screens:recordDetail.location")}
             </Text>
-            <Text className={[primaryTextClassName, "mt-1"].join(" ")}>
+            <Text
+              className={[
+                recordDetailScreenStyles.text.primary,
+                recordDetailScreenStyles.section.noteTextSpacing,
+              ].join(" ")}
+            >
               {record.lat.toFixed(5)}, {record.lng.toFixed(5)}
               {record.locationAccuracy != null
                 ? ` (±${Math.round(record.locationAccuracy)} m)`
@@ -277,14 +248,14 @@ const RecordDetailScreen = observer(() => {
           </View>
         ) : null}
 
-        <View className={sectionClassName}>
-          <Text className={sectionLabelClassName}>
+        <View className={recordDetailScreenStyles.section.wrapper}>
+          <Text className={recordDetailScreenStyles.text.sectionLabel}>
             {t("screens:recordDetail.photos")}
           </Text>
 
           {record.photos.length === 0 ? (
-            <View className={emptyPhotosClassName}>
-              <Text className={emptyPhotosTextClassName}>
+            <View className={recordDetailScreenStyles.photos.emptyContainer}>
+              <Text className={recordDetailScreenStyles.text.emptyPhotos}>
                 {t("screens:recordDetail.photosEmpty", {
                   defaultValue: "Žádné fotografie.",
                 })}
@@ -292,14 +263,17 @@ const RecordDetailScreen = observer(() => {
             </View>
           ) : (
             record.photos.map((p) => (
-              <View key={p.id} className={photoCardClassName}>
+              <View key={p.id} className={recordDetailScreenStyles.photos.card}>
                 <Image
                   source={{ uri: resolvePhotoUrl(baseUrl, p.path) }}
-                  className={photoImageClassName}
+                  className={recordDetailScreenStyles.photos.image}
                   resizeMode="cover"
                 />
-                <View className={photoFooterClassName}>
-                  <Text className={photoPathClassName} numberOfLines={1}>
+                <View className={recordDetailScreenStyles.photos.footer}>
+                  <Text
+                    className={recordDetailScreenStyles.photos.path}
+                    numberOfLines={1}
+                  >
                     {p.path}
                   </Text>
                 </View>

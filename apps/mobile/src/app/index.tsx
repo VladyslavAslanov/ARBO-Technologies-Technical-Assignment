@@ -1,5 +1,5 @@
 import React from "react";
-import { RecordsScreen } from "../screens/RecordsScreen";
+import { RecordsScreen } from "../screens/RecordsScreen/RecordsScreen";
 
 const Index = () => {
   return <RecordsScreen />;

@@ -4,22 +4,11 @@ import { observer } from "mobx-react-lite";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { useStores } from "../core/rootStore";
-import PillButton from "../components/PillButton";
-import DefectTypeDropdown from "../components/DefectTypeDropdown";
-import SingleSelectDropdown from "../components/SingleSelectDropdown";
-
-const screenClassName = "flex-1 pt-16 bg-white dark:bg-zinc-950";
-const headerClassName = "px-4 mb-3 flex-row items-center justify-between";
-const titleClassName =
-  "text-2xl font-semibold text-zinc-900 dark:text-zinc-100";
-
-const headerActionPressableClassName = "px-3 py-2";
-const headerActionTextClassName =
-  "font-semibold text-zinc-900 dark:text-zinc-100";
-
-const contentClassName = "px-4 pb-6";
-const labelClassName = "mb-1.5 text-zinc-500 dark:text-zinc-400";
+import { useStores } from "../../core/rootStore";
+import PillButton from "../../components/PillButton/PillButton";
+import DefectTypeDropdown from "../../components/DefectTypeDropdown/DefectTypeDropdown";
+import SingleSelectDropdown from "../../components/SingleSelectDropdown/SingleSelectDropdown";
+import { filterScreenStyles } from "./FilterScreenStyles";
 
 export const FilterScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
@@ -31,24 +20,24 @@ export const FilterScreen = observer(() => {
   const [maxOpen, setMaxOpen] = useState(false);
 
   return (
-    <View className={screenClassName}>
-      <View className={headerClassName}>
-        <Text className={titleClassName}>
+    <View className={filterScreenStyles.screen}>
+      <View className={filterScreenStyles.header}>
+        <Text className={filterScreenStyles.title}>
           {t("screens:filters.title", { defaultValue: "Filtry" })}
         </Text>
 
         <Pressable
           onPress={() => router.back()}
-          className={headerActionPressableClassName}
+          className={filterScreenStyles.headerAction.pressable}
         >
-          <Text className={headerActionTextClassName}>
+          <Text className={filterScreenStyles.headerAction.text}>
             {t("common:close", { defaultValue: "Zavřít" })}
           </Text>
         </Pressable>
       </View>
 
-      <ScrollView contentContainerClassName={contentClassName}>
-        <Text className={labelClassName}>
+      <ScrollView contentContainerClassName={filterScreenStyles.content}>
+        <Text className={filterScreenStyles.label}>
           {t("screens:records.filters.defectType", { defaultValue: "Defekt" })}
         </Text>
 
@@ -70,12 +59,12 @@ export const FilterScreen = observer(() => {
           tClear={t("screens:records.filters.clear")}
         />
 
-        <View className="mt-4">
-          <Text className={labelClassName}>
+        <View className={filterScreenStyles.section.spacer}>
+          <Text className={filterScreenStyles.label}>
             {t("screens:records.filters.days", { defaultValue: "Období" })}
           </Text>
 
-          <View className="flex-row">
+          <View className={filterScreenStyles.row.base}>
             <PillButton
               label="7"
               active={recordsStore.days === 7}
@@ -94,12 +83,12 @@ export const FilterScreen = observer(() => {
           </View>
         </View>
 
-        <View className="mt-4">
-          <Text className={labelClassName}>
+        <View className={filterScreenStyles.section.spacer}>
+          <Text className={filterScreenStyles.label}>
             {t("screens:records.filters.sort", { defaultValue: "Řazení" })}
           </Text>
 
-          <View className="flex-row">
+          <View className={filterScreenStyles.row.base}>
             <PillButton
               label={t("screens:records.filters.sortCreatedAt")}
               active={recordsStore.sortBy === "createdAt"}
@@ -118,14 +107,14 @@ export const FilterScreen = observer(() => {
           </View>
         </View>
 
-        <View className="mt-4">
-          <Text className={labelClassName}>
+        <View className={filterScreenStyles.section.spacer}>
+          <Text className={filterScreenStyles.label}>
             {t("screens:records.filters.severity", {
               defaultValue: "Závažnost",
             })}
           </Text>
 
-          <View className="flex-row gap-2.5">
+          <View className={filterScreenStyles.row.gap}>
             <SingleSelectDropdown
               label={t("screens:records.filters.min", { defaultValue: "Min" })}
               valueLabel={
@@ -180,12 +169,12 @@ export const FilterScreen = observer(() => {
           </View>
         </View>
 
-        <View className="mt-6">
+        <View className={filterScreenStyles.resetButton.wrapper}>
           <Pressable
             onPress={() => recordsStore.resetFilters()}
-            className="mt-6 items-center rounded-xl border border-zinc-300 dark:border-zinc-700 py-3"
+            className={filterScreenStyles.resetButton.pressable}
           >
-            <Text className="font-semibold text-zinc-900 dark:text-zinc-100">
+            <Text className={filterScreenStyles.resetButton.text}>
               {t("screens:filters.reset", { defaultValue: "Resetovat" })}
             </Text>
           </Pressable>
