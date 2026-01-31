@@ -52,6 +52,18 @@ export class RecordsStore {
     this.error = null;
   }
 
+  setDays(days: 7 | 14 | 30) {
+    if (this.days === days) return;
+    this.days = days;
+  }
+  setSortBy(sortBy: "createdAt" | "severity") {
+    this.sortBy = sortBy;
+  }
+
+  toggleOrder() {
+    this.order = this.order === "desc" ? "asc" : "desc";
+  }
+
   private buildQuery() {
     const params = new URLSearchParams();
     params.set("days", String(this.days));
@@ -60,6 +72,10 @@ export class RecordsStore {
     params.set("sortBy", this.sortBy);
     params.set("order", this.order);
     return params.toString();
+  }
+
+  async applyAndReload(deviceId: string) {
+    await this.loadFirstPage(deviceId);
   }
 
   async loadFirstPage(deviceId: string) {

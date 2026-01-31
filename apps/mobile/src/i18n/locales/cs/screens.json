@@ -1,6 +1,12 @@
 {
   "records": {
     "title": "Záznamy",
-    "empty": "Zatím žádné záznamy"
+    "empty": "Zatím žádné záznamy",
+    "filters": {
+      "days": "Období",
+      "sort": "Řazení",
+      "sortCreatedAt": "Nejnovější",
+      "sortSeverity": "Závažnost"
+    }
   }
 }

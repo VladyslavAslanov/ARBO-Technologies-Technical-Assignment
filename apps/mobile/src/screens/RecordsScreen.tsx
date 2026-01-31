@@ -10,6 +10,35 @@ import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import { useStores } from "../core/rootStore";
 
+function PillButton({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Text
+      onPress={onPress}
+      style={{
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 999,
+        borderWidth: 1,
+        borderColor: active ? "#111" : "#ddd",
+        backgroundColor: active ? "#111" : "transparent",
+        color: active ? "#fff" : "#111",
+        overflow: "hidden",
+        marginRight: 8,
+      }}
+    >
+      {label}
+    </Text>
+  );
+}
+
 export const RecordsScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
   const { sessionStore, recordsStore } = useStores();
@@ -20,7 +49,13 @@ export const RecordsScreen = observer(() => {
     if (!sessionStore.isReady) return;
     if (!sessionStore.deviceId) return;
     recordsStore.loadFirstPage(sessionStore.deviceId);
-  }, [sessionStore.isReady, sessionStore.deviceId]);
+  }, [
+    sessionStore.isReady,
+    sessionStore.deviceId,
+    recordsStore.days,
+    recordsStore.sortBy,
+    recordsStore.order,
+  ]);
 
   if (!sessionStore.isReady) {
     return (
@@ -56,6 +91,50 @@ export const RecordsScreen = observer(() => {
       >
         {t("screens:records.title")}
       </Text>
+
+      <View style={{ paddingHorizontal: 16, marginBottom: 10 }}>
+        <Text style={{ marginBottom: 6, opacity: 0.7 }}>
+          {t("screens:records.filters.days")}
+        </Text>
+        <View style={{ flexDirection: "row", marginBottom: 10 }}>
+          <PillButton
+            label="7"
+            active={recordsStore.days === 7}
+            onPress={() => recordsStore.setDays(7)}
+          />
+          <PillButton
+            label="14"
+            active={recordsStore.days === 14}
+            onPress={() => recordsStore.setDays(14)}
+          />
+          <PillButton
+            label="30"
+            active={recordsStore.days === 30}
+            onPress={() => recordsStore.setDays(30)}
+          />
+        </View>
+
+        <Text style={{ marginBottom: 6, opacity: 0.7 }}>
+          {t("screens:records.filters.sort")}
+        </Text>
+        <View style={{ flexDirection: "row" }}>
+          <PillButton
+            label={t("screens:records.filters.sortCreatedAt")}
+            active={recordsStore.sortBy === "createdAt"}
+            onPress={() => recordsStore.setSortBy("createdAt")}
+          />
+          <PillButton
+            label={t("screens:records.filters.sortSeverity")}
+            active={recordsStore.sortBy === "severity"}
+            onPress={() => recordsStore.setSortBy("severity")}
+          />
+          <PillButton
+            label={recordsStore.order.toUpperCase()}
+            active={true}
+            onPress={() => recordsStore.toggleOrder()}
+          />
+        </View>
+      </View>
 
       <Text style={{ paddingHorizontal: 16, marginBottom: 8, opacity: 0.7 }}>
         deviceId: {sessionStore.deviceId}
