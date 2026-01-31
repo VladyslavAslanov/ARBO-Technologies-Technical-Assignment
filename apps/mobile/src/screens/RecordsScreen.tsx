@@ -261,26 +261,28 @@ export const RecordsScreen = observer(() => {
             ) : null
           }
           renderItem={({ item }) => (
-            <View
-              style={{
-                padding: 12,
-                borderWidth: 1,
-                borderColor: "#ddd",
-                borderRadius: 10,
-                marginBottom: 10,
-              }}
-            >
-              <Text style={{ fontWeight: "600" }}>
-                {t(`defects:${item.defectType}.label`, {
-                  defaultValue: item.defectType,
-                })}{" "}
-                • {item.severity}/5
-              </Text>
-              <Text style={{ marginTop: 4 }}>
-                {new Date(item.createdAt).toLocaleString("cs-CZ")}
-              </Text>
-              <Text style={{ marginTop: 4 }}>photos: {item.photosCount}</Text>
-            </View>
+            <Pressable onPress={() => router.push(`/records/${item.id}`)}>
+              <View
+                style={{
+                  padding: 12,
+                  borderWidth: 1,
+                  borderColor: "#ddd",
+                  borderRadius: 10,
+                  marginBottom: 10,
+                }}
+              >
+                <Text style={{ fontWeight: "600" }}>
+                  {t(`defects:${item.defectType}.label`, {
+                    defaultValue: item.defectType,
+                  })}{" "}
+                  • {item.severity}/5
+                </Text>
+                <Text style={{ marginTop: 4 }}>
+                  {new Date(item.createdAt).toLocaleString("cs-CZ")}
+                </Text>
+                <Text style={{ marginTop: 4 }}>photos: {item.photosCount}</Text>
+              </View>
+            </Pressable>
           )}
         />
       )}

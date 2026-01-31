@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -15,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 
 import { useStores } from "../core/rootStore";
+import { getCurrentLocation } from "../services/locationService";
 
 type PickedPhoto = {
   uri: string;
@@ -80,8 +81,33 @@ export const CreateRecordScreen = observer(() => {
   const [severity, setSeverity] = useState<number>(3);
   const [note, setNote] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
+  const [location, setLocation] = useState<{
+    lat: number;
+    lng: number;
+    accuracy: number | null;
+  } | null>(null);
 
   const deviceId = sessionStore.deviceId;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      const res = await getCurrentLocation();
+      if (cancelled) return;
+      if (res.ok) {
+        setLocation({ lat: res.lat, lng: res.lng, accuracy: res.accuracy });
+      } else {
+        setLocation(null);
+      }
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const canSubmit = useMemo(() => {
     return (
@@ -203,7 +229,12 @@ export const CreateRecordScreen = observer(() => {
       if (!resp.ok) {
         throw new Error(text || `Upload failed with ${resp.status}`);
       }
-
+      if (location) {
+        form.append("lat", String(location.lat));
+        form.append("lng", String(location.lng));
+        if (location.accuracy != null)
+          form.append("locationAccuracy", String(location.accuracy));
+      }
       // Back to list and refresh
       router.back();
     } catch (e: any) {
@@ -373,6 +404,12 @@ export const CreateRecordScreen = observer(() => {
             ))}
           </View>
         ) : null}
+
+        <Text style={{ marginTop: 8, opacity: 0.6, fontSize: 12 }}>
+          {location
+            ? `GPS: ${location.lat.toFixed(5)}, ${location.lng.toFixed(5)} (±${location.accuracy ?? "—"} m)`
+            : "GPS: —"}
+        </Text>
 
         <Pressable
           onPress={submit}

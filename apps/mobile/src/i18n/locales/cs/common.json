@@ -4,5 +4,6 @@
   "error": "Chyba",
   "cancel": "Zrušit",
   "delete": "Smazat",
-  "confirm": "Potvrdit"
+  "confirm": "Potvrdit",
+  "close": "Zavřít"
 }

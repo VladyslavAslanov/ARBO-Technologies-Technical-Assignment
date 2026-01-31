@@ -17,5 +17,13 @@
       "max": "Max",
       "any": "—"
     }
+  },
+  "recordDetail": {
+    "title": "Detail záznamu",
+    "deleteTitle": "Smazat záznam",
+    "deleteConfirm": "Opravdu chceš tento záznam smazat?",
+    "note": "Poznámka",
+    "location": "Poloha",
+    "photos": "Fotky"
   }
 }
