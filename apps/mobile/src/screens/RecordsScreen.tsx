@@ -5,6 +5,7 @@ import {
   Text,
   View,
   RefreshControl,
+  Pressable,
 } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
@@ -12,10 +13,13 @@ import { useStores } from "../core/rootStore";
 import PillButton from "../components/PillButton";
 import DefectTypeDropdown from "../components/DefectTypeDropdown";
 import SingleSelectDropdown from "../components/SingleSelectDropdown";
+import { useRouter } from "expo-router";
 
 export const RecordsScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
   const { sessionStore, recordsStore, defectTypesStore } = useStores();
+
+  const router = useRouter();
 
   const [defectsOpen, setDefectsOpen] = useState(false);
   const [minOpen, setMinOpen] = useState(false);
@@ -72,16 +76,32 @@ export const RecordsScreen = observer(() => {
     !isInitialLoading && !recordsStore.error && recordsStore.items.length === 0;
   return (
     <View style={{ flex: 1, paddingTop: 60 }}>
-      <Text
+      <View
         style={{
-          fontSize: 22,
-          fontWeight: "600",
           paddingHorizontal: 16,
           marginBottom: 12,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        {t("screens:records.title")}
-      </Text>
+        <Text style={{ fontSize: 22, fontWeight: "600" }}>
+          {t("screens:records.title")}
+        </Text>
+
+        <Pressable
+          onPress={() => router.push("/create")}
+          style={{
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: "#111",
+          }}
+        >
+          <Text style={{ fontWeight: "600" }}>+</Text>
+        </Pressable>
+      </View>
 
       <View style={{ paddingHorizontal: 16, marginBottom: 10 }}>
         <View style={{ marginTop: 12 }}>

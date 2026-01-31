@@ -16,5 +16,8 @@
   },
   "dependencies": {
     "expo-router": "^6.0.22"
+  },
+  "overrides": {
+    "react-native-screens": "4.16.0"
   }
 }
