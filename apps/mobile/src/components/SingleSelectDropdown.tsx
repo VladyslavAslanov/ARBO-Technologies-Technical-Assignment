@@ -1,6 +1,6 @@
 import { Pressable, Modal, ScrollView, Text, View } from "react-native";
 
-export default function SingleSelectDropdown({
+const SingleSelectDropdown = ({
   label,
   valueLabel,
   options,
@@ -16,7 +16,7 @@ export default function SingleSelectDropdown({
   onOpen: () => void;
   onClose: () => void;
   onSelect: (value: number | null) => void;
-}) {
+}) => {
   return (
     <>
       <Pressable
@@ -81,4 +81,6 @@ export default function SingleSelectDropdown({
       </Modal>
     </>
   );
-}
+};
+
+export default SingleSelectDropdown;

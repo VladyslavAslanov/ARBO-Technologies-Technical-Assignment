@@ -1,6 +1,6 @@
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 
-export default function DefectTypeDropdown({
+const DefectTypeDropdown = ({
   label,
   items,
   selected,
@@ -28,7 +28,7 @@ export default function DefectTypeDropdown({
   tAll: string;
   tClose: string;
   tClear: string;
-}) {
+}) => {
   const selectedCount = selected.length;
 
   return (
@@ -107,4 +107,6 @@ export default function DefectTypeDropdown({
       </Modal>
     </>
   );
-}
+};
+
+export default DefectTypeDropdown;

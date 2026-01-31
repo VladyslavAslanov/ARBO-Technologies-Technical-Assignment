@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { StoresContext, rootStore } from "../core/rootStore";
 
-export default function RootLayout() {
+const RootLayout = () => {
   useEffect(() => {
     rootStore.sessionStore.init();
     const run = async () => {
@@ -21,4 +21,6 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }} />
     </StoresContext.Provider>
   );
-}
+};
+
+export default RootLayout;

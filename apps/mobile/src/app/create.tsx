@@ -1,6 +1,8 @@
 import React from "react";
 import { CreateRecordScreen } from "../screens/CreateRecordScreen";
 
-export default function Create() {
+const Create = () => {
   return <CreateRecordScreen />;
-}
+};
+
+export default Create;

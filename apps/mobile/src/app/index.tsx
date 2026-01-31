@@ -1,6 +1,8 @@
 import React from "react";
 import { RecordsScreen } from "../screens/RecordsScreen";
 
-export default function Index() {
+const Index = () => {
   return <RecordsScreen />;
-}
+};
+
+export default Index;

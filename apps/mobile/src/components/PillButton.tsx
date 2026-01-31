@@ -6,11 +6,7 @@ interface PillButtonProps {
   onPress: () => void;
 }
 
-export default function PillButton({
-  label,
-  active,
-  onPress,
-}: PillButtonProps) {
+const PillButton = ({ label, active, onPress }: PillButtonProps) => {
   return (
     <Text
       onPress={onPress}
@@ -29,4 +25,6 @@ export default function PillButton({
       {label}
     </Text>
   );
-}
+};
+
+export default PillButton;

@@ -14,6 +14,7 @@ import PillButton from "../components/PillButton";
 import DefectTypeDropdown from "../components/DefectTypeDropdown";
 import SingleSelectDropdown from "../components/SingleSelectDropdown";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "expo-router";
 
 export const RecordsScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
@@ -50,6 +51,14 @@ export const RecordsScreen = observer(() => {
     recordsStore.maxSeverity,
     severityKey,
   ]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!sessionStore.isReady) return;
+      if (!sessionStore.deviceId) return;
+      recordsStore.loadFirstPage(sessionStore.deviceId);
+    }, [sessionStore.isReady, sessionStore.deviceId])
+  );
 
   if (!sessionStore.isReady) {
     return (
