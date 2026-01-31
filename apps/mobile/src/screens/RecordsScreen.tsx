@@ -1,10 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   Text,
   View,
   RefreshControl,
+  Modal,
+  Pressable,
+  ScrollView,
 } from "react-native";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
@@ -39,11 +42,127 @@ function PillButton({
   );
 }
 
+function DefectTypeDropdown({
+  label,
+  items,
+  selected,
+  onToggle,
+  onClear,
+  onClose,
+  visible,
+  onOpen,
+  renderLabel,
+  tSelected,
+  tAll,
+  tClose,
+  tClear,
+}: {
+  label: string;
+  items: Array<{ key: string; category: string }>;
+  selected: string[];
+  onToggle: (key: string) => void;
+  onClear: () => void;
+  visible: boolean;
+  onClose: () => void;
+  onOpen: () => void;
+  renderLabel: (key: string) => string;
+  tSelected: string;
+  tAll: string;
+  tClose: string;
+  tClear: string;
+}) {
+  const selectedCount = selected.length;
+
+  return (
+    <>
+      <Pressable
+        onPress={onOpen}
+        style={{
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: "#ddd",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ fontWeight: "600" }}>{label}</Text>
+        <Text style={{ opacity: 0.7 }}>
+          {selectedCount === 0 ? tAll : `${tSelected}: ${selectedCount}`}
+        </Text>
+      </Pressable>
+
+      <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+        <View style={{ flex: 1, paddingTop: 60 }}>
+          <View
+            style={{
+              paddingHorizontal: 16,
+              paddingBottom: 12,
+              borderBottomWidth: 1,
+              borderBottomColor: "#eee",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "600" }}>{label}</Text>
+            <View style={{ flexDirection: "row" }}>
+              <Pressable onPress={onClear} style={{ padding: 10 }}>
+                <Text style={{ fontWeight: "600" }}>{tClear}</Text>
+              </Pressable>
+              <Pressable onPress={onClose} style={{ padding: 10 }}>
+                <Text style={{ fontWeight: "600" }}>{tClose}</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <ScrollView contentContainerStyle={{ padding: 16 }}>
+            {items.map((it) => {
+              const active = selected.includes(it.key);
+              return (
+                <Pressable
+                  key={it.key}
+                  onPress={() => onToggle(it.key)}
+                  style={{
+                    paddingVertical: 12,
+                    paddingHorizontal: 12,
+                    borderWidth: 1,
+                    borderColor: active ? "#111" : "#ddd",
+                    borderRadius: 10,
+                    marginBottom: 10,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ fontWeight: "600" }}>
+                    {renderLabel(it.key)}
+                  </Text>
+                  <Text>{active ? "✓" : ""}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </Modal>
+    </>
+  );
+}
+
 export const RecordsScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
-  const { sessionStore, recordsStore } = useStores();
+  const { sessionStore, recordsStore, defectTypesStore } = useStores();
+
+  const [defectsOpen, setDefectsOpen] = useState(false);
 
   console.log(sessionStore.deviceId);
+
+  const defectTypesKey = recordsStore.selectedDefectTypes
+    .slice()
+    .sort()
+    .join("|");
 
   useEffect(() => {
     if (!sessionStore.isReady) return;
@@ -55,6 +174,7 @@ export const RecordsScreen = observer(() => {
     recordsStore.days,
     recordsStore.sortBy,
     recordsStore.order,
+    defectTypesKey,
   ]);
 
   if (!sessionStore.isReady) {
@@ -77,7 +197,7 @@ export const RecordsScreen = observer(() => {
   }
 
   const deviceId = sessionStore.deviceId!;
-  const empty = !recordsStore.loading && recordsStore.items.length === 0;
+  const isEmpty = !recordsStore.loading && recordsStore.items.length === 0;
 
   return (
     <View style={{ flex: 1, paddingTop: 60 }}>
@@ -93,6 +213,25 @@ export const RecordsScreen = observer(() => {
       </Text>
 
       <View style={{ paddingHorizontal: 16, marginBottom: 10 }}>
+        <View style={{ marginTop: 12 }}>
+          <DefectTypeDropdown
+            label={t("screens:records.filters.defectType")}
+            items={defectTypesStore.items}
+            selected={recordsStore.selectedDefectTypes}
+            onToggle={(k) => recordsStore.toggleDefectType(k)}
+            onClear={() => recordsStore.clearDefectTypes()}
+            visible={defectsOpen}
+            onOpen={() => setDefectsOpen(true)}
+            onClose={() => setDefectsOpen(false)}
+            renderLabel={(key) =>
+              t(`defects:${key}.label`, { defaultValue: key })
+            }
+            tSelected={t("screens:records.filters.selected")}
+            tAll={t("screens:records.filters.allDefects")}
+            tClose={t("screens:records.filters.close")}
+            tClear={t("screens:records.filters.clear")}
+          />
+        </View>
         <Text style={{ marginBottom: 6, opacity: 0.7 }}>
           {t("screens:records.filters.days")}
         </Text>
@@ -148,11 +287,11 @@ export const RecordsScreen = observer(() => {
         </View>
       ) : null}
 
-      {empty ? (
+      {isEmpty ? (
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
-          <Text>{t("screens:records.empty")}</Text>
+          <Text>{t("screens:records.isEmpty")}</Text>
         </View>
       ) : (
         <FlatList

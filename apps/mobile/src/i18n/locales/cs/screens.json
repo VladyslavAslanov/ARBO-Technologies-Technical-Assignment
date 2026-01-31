@@ -6,7 +6,12 @@
       "days": "Období",
       "sort": "Řazení",
       "sortCreatedAt": "Nejnovější",
-      "sortSeverity": "Závažnost"
+      "sortSeverity": "Závažnost",
+      "defectType": "Defekt",
+      "allDefects": "Vše",
+      "selected": "Vybráno",
+      "close": "Zavřít",
+      "clear": "Vymazat"
     }
   }
 }

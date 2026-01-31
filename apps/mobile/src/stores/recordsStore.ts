@@ -30,6 +30,7 @@ export class RecordsStore {
   items: RecordListItem[] = [];
   loading = false;
   error: string | null = null;
+  selectedDefectTypes: string[] = [];
 
   // Paging
   limit = 20;
@@ -56,12 +57,31 @@ export class RecordsStore {
     if (this.days === days) return;
     this.days = days;
   }
+
   setSortBy(sortBy: "createdAt" | "severity") {
     this.sortBy = sortBy;
   }
 
   toggleOrder() {
     this.order = this.order === "desc" ? "asc" : "desc";
+  }
+
+  setSelectedDefectTypes(keys: string[]) {
+    this.selectedDefectTypes = keys;
+  }
+
+  toggleDefectType(key: string) {
+    if (this.selectedDefectTypes.includes(key)) {
+      this.selectedDefectTypes = this.selectedDefectTypes.filter(
+        (x) => x !== key
+      );
+    } else {
+      this.selectedDefectTypes = this.selectedDefectTypes.concat(key);
+    }
+  }
+
+  clearDefectTypes() {
+    this.selectedDefectTypes = [];
   }
 
   private buildQuery() {
@@ -71,6 +91,11 @@ export class RecordsStore {
     params.set("offset", String(this.offset));
     params.set("sortBy", this.sortBy);
     params.set("order", this.order);
+
+    for (const dt of this.selectedDefectTypes) {
+      params.append("defectType", dt);
+    }
+
     return params.toString();
   }
 
