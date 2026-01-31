@@ -54,11 +54,11 @@ const listContainerClassName =
 const listItemBaseClassName = "px-3 py-3";
 const listItemDividerClassName =
   "border-t border-zinc-200 dark:border-zinc-800";
-const listItemActiveClassName = "bg-zinc-900 dark:bg-zinc-100";
+const listItemActiveClassName = "bg-zinc-200 dark:bg-zinc-800";
 const listItemInactiveClassName = "bg-transparent";
 
 const listItemTextBaseClassName = "font-semibold";
-const listItemTextActiveClassName = "text-white dark:text-zinc-900";
+const listItemTextActiveClassName = "text-dark dark:text-zinc-200";
 const listItemTextInactiveClassName = "text-zinc-900 dark:text-zinc-100";
 
 const inputClassName =
@@ -486,7 +486,6 @@ export const CreateRecordScreen = observer(() => {
                 submitting ? "opacity-50" : "",
               ].join(" ")}
             >
-              {" "}
               <Text className={photoButtonTextClassName}>
                 {t("screens:create.takePhoto", {
                   defaultValue: "Sfotografovat",

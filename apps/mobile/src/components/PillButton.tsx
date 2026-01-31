@@ -10,13 +10,13 @@ interface PillButtonProps {
 const basePressableClass = "mr-2 rounded-full border px-3 py-1.5";
 
 const activePressableClass =
-  "border-zinc-300 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800";
+  "border-zinc-300 bg-zinc-200 dark:border-zinc-700 dark:bg-zinc-800";
 
 const inactivePressableClass =
   "border-zinc-200 bg-transparent dark:border-zinc-800 dark:bg-transparent";
 
 const baseTextClass = "font-semibold";
-const activeTextClass = "text-zinc-900 dark:text-zinc-100";
+const activeTextClass = "text-zinc-900 dark:text-zinc-200";
 const inactiveTextClass = "text-zinc-700 dark:text-zinc-300";
 
 const PillButton = ({ label, active, onPress }: PillButtonProps) => {
