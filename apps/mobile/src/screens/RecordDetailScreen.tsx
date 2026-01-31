@@ -38,6 +38,22 @@ function resolvePhotoUrl(baseUrl: string, path: string) {
   return `${baseUrl}${path}`;
 }
 
+function parseApiErrorMessage(raw: string): string {
+  if (!raw) return "Request failed";
+
+  try {
+    const data = JSON.parse(raw);
+    const msg = (data?.message ?? data?.error ?? data) as unknown;
+
+    if (Array.isArray(msg)) return msg.join("\n");
+    if (typeof msg === "string") return msg;
+
+    return raw;
+  } catch {
+    return raw;
+  }
+}
+
 const loadingCenterClassName = "flex-1 items-center justify-center";
 const loadingTextClassName = "mt-2 text-zinc-500 dark:text-zinc-400";
 
@@ -47,7 +63,7 @@ const headerClassName = "px-4 mb-3 flex-row items-center justify-between";
 const titleClassName =
   "text-2xl font-semibold text-zinc-900 dark:text-zinc-100";
 
-const headerActionsClassName = "flex-row";
+const headerActionsClassName = "flex-row gap-2";
 const headerActionPressableClassName = "px-3 py-2";
 const headerActionTextClassName =
   "font-semibold text-zinc-900 dark:text-zinc-100";
@@ -62,6 +78,10 @@ const metaTextClassName = "mt-1.5 text-zinc-500 dark:text-zinc-400";
 
 const sectionClassName = "mt-4";
 const sectionLabelClassName = "text-zinc-500 dark:text-zinc-400";
+
+const emptyPhotosClassName =
+  "mt-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-3";
+const emptyPhotosTextClassName = "text-zinc-500 dark:text-zinc-400";
 
 const photoCardClassName =
   "mt-2.5 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900";
@@ -99,7 +119,7 @@ const RecordDetailScreen = observer(() => {
         });
 
         const text = await resp.text();
-        if (!resp.ok) throw new Error(text || `Request failed: ${resp.status}`);
+        if (!resp.ok) throw new Error(parseApiErrorMessage(text));
 
         const json = JSON.parse(text) as RecordDetail;
         if (!cancelled) setRecord(json);
@@ -136,8 +156,7 @@ const RecordDetailScreen = observer(() => {
               });
 
               const text = await resp.text();
-              if (!resp.ok)
-                throw new Error(text || `Delete failed: ${resp.status}`);
+              if (!resp.ok) throw new Error(parseApiErrorMessage(text));
 
               await recordsStore.loadFirstPage(deviceId);
               router.back();
@@ -209,6 +228,7 @@ const RecordDetailScreen = observer(() => {
               {t("common:delete")}
             </Text>
           </Pressable>
+
           <Pressable
             onPress={() => router.back()}
             className={headerActionPressableClassName}
@@ -262,20 +282,30 @@ const RecordDetailScreen = observer(() => {
             {t("screens:recordDetail.photos")}
           </Text>
 
-          {record.photos.map((p) => (
-            <View key={p.id} className={photoCardClassName}>
-              <Image
-                source={{ uri: resolvePhotoUrl(baseUrl, p.path) }}
-                className={photoImageClassName}
-                resizeMode="cover"
-              />
-              <View className={photoFooterClassName}>
-                <Text className={photoPathClassName} numberOfLines={1}>
-                  {p.path}
-                </Text>
-              </View>
+          {record.photos.length === 0 ? (
+            <View className={emptyPhotosClassName}>
+              <Text className={emptyPhotosTextClassName}>
+                {t("screens:recordDetail.photosEmpty", {
+                  defaultValue: "Žádné fotografie.",
+                })}
+              </Text>
             </View>
-          ))}
+          ) : (
+            record.photos.map((p) => (
+              <View key={p.id} className={photoCardClassName}>
+                <Image
+                  source={{ uri: resolvePhotoUrl(baseUrl, p.path) }}
+                  className={photoImageClassName}
+                  resizeMode="cover"
+                />
+                <View className={photoFooterClassName}>
+                  <Text className={photoPathClassName} numberOfLines={1}>
+                    {p.path}
+                  </Text>
+                </View>
+              </View>
+            ))
+          )}
         </View>
       </ScrollView>
     </View>
