@@ -1,20 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import "./src/i18n";
+
+import React, { useEffect } from "react";
+import { StoresContext, rootStore } from "./src/core/rootStore";
+import { RecordsScreen } from "./src/screens/RecordsScreen";
 
 export default function App() {
+  useEffect(() => {
+    rootStore.sessionStore.init();
+    console.log(rootStore.sessionStore.init());
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <StoresContext.Provider value={rootStore}>
+      <RecordsScreen />
+    </StoresContext.Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
