@@ -20,10 +20,6 @@ export const RecordsScreen = observer(() => {
   const { sessionStore, recordsStore } = useStores();
   const router = useRouter();
 
-  const [defectsOpen, setDefectsOpen] = useState(false);
-  const [minOpen, setMinOpen] = useState(false);
-  const [maxOpen, setMaxOpen] = useState(false);
-
   const defectTypesKey = useMemo(
     () => recordsStore.selectedDefectTypes.slice().sort().join("|"),
     [recordsStore.selectedDefectTypes]

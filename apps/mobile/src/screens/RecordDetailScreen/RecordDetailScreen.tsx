@@ -14,6 +14,7 @@ import { observer } from "mobx-react-lite";
 
 import { useStores } from "../../core/rootStore";
 import { recordDetailScreenStyles } from "./RecordDetailScreenStyles";
+import { parseApiErrorMessage, resolvePhotoUrl } from "../../helpers/helpers";
 
 type RecordPhoto = {
   id: string;
@@ -33,27 +34,6 @@ type RecordDetail = {
   locationAccuracy: number | null;
   photos: RecordPhoto[];
 };
-
-function resolvePhotoUrl(baseUrl: string, path: string) {
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  return `${baseUrl}${path}`;
-}
-
-function parseApiErrorMessage(raw: string): string {
-  if (!raw) return "Request failed";
-
-  try {
-    const data = JSON.parse(raw);
-    const msg = (data?.message ?? data?.error ?? data) as unknown;
-
-    if (Array.isArray(msg)) return msg.join("\n");
-    if (typeof msg === "string") return msg;
-
-    return raw;
-  } catch {
-    return raw;
-  }
-}
 
 const RecordDetailScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);

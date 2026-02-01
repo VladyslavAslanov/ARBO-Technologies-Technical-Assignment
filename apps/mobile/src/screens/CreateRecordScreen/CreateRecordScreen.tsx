@@ -13,12 +13,18 @@ import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import * as ImageManipulator from "expo-image-manipulator";
 
 import { useStores } from "../../core/rootStore";
 import { getCurrentLocation } from "../../services/locationService";
 import PillButton from "../../components/PillButton/PillButton";
 import { createRecordScreenStyles } from "./CreateRecordScreenStyles";
+import {
+  ensureCameraPermission,
+  ensureMediaPermission,
+  getFileSizeBytes,
+  normalizeToJpeg,
+  parseApiErrorMessage,
+} from "../../helpers/helpers";
 
 type PickedPhoto = {
   uri: string;
@@ -30,64 +36,6 @@ type PickedPhoto = {
 
 const maxPhotos = 10;
 const maxBytes = 5 * 1024 * 1024;
-
-async function ensureCameraPermission() {
-  const { status } = await ImagePicker.requestCameraPermissionsAsync();
-  return status === "granted";
-}
-
-async function ensureMediaPermission() {
-  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  return status === "granted";
-}
-
-async function normalizeToJpeg(
-  assetUri: string
-): Promise<{ uri: string; mimeType: string }> {
-  let currentUri = assetUri;
-
-  for (const step of [
-    { compress: 0.9, resize: undefined as number | undefined },
-    { compress: 0.8, resize: 1920 },
-    { compress: 0.7, resize: 1600 },
-    { compress: 0.6, resize: 1280 },
-  ]) {
-    const actions: ImageManipulator.Action[] = [];
-    if (step.resize) actions.push({ resize: { width: step.resize } });
-
-    const result = await ImageManipulator.manipulateAsync(currentUri, actions, {
-      compress: step.compress,
-      format: ImageManipulator.SaveFormat.JPEG,
-    });
-
-    currentUri = result.uri;
-  }
-
-  return { uri: currentUri, mimeType: "image/jpeg" };
-}
-
-async function getFileSizeBytes(uri: string): Promise<number> {
-  const res = await fetch(uri);
-  const blob = await res.blob();
-  return blob.size;
-}
-
-function parseApiErrorMessage(raw: string): string {
-  if (!raw) return "Request failed";
-
-  try {
-    const data = JSON.parse(raw);
-
-    const msg = (data?.message ?? data?.error ?? data) as unknown;
-
-    if (Array.isArray(msg)) return msg.join("\n");
-    if (typeof msg === "string") return msg;
-
-    return raw;
-  } catch {
-    return raw;
-  }
-}
 
 export const CreateRecordScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
