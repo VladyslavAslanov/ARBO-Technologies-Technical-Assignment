@@ -3,9 +3,9 @@ import {
   ExecutionContext,
   Injectable,
   BadRequestException,
-} from '@nestjs/common';
-import { PrismaService } from '../../database/prisma.service';
-import { RequestWithUser } from './request-with-user';
+} from "@nestjs/common";
+import { PrismaService } from "../../database/prisma.service";
+import { RequestWithUser } from "./request-with-user";
 
 @Injectable()
 export class DeviceIdGuard implements CanActivate {
@@ -14,19 +14,19 @@ export class DeviceIdGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<RequestWithUser>();
 
-    const raw = req.headers['x-device-id'];
+    const raw = req.headers["x-device-id"];
     const deviceId = Array.isArray(raw) ? raw[0] : raw;
 
     if (
       !deviceId ||
-      typeof deviceId !== 'string' ||
+      typeof deviceId !== "string" ||
       deviceId.trim().length === 0
     ) {
-      throw new BadRequestException('Missing x-device-id header');
+      throw new BadRequestException("Missing x-device-id header");
     }
 
     if (deviceId.length > 128) {
-      throw new BadRequestException('Invalid x-device-id header');
+      throw new BadRequestException("Invalid x-device-id header");
     }
 
     const user = await this.prisma.user.upsert({

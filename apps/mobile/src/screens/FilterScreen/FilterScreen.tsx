@@ -80,6 +80,13 @@ export const FilterScreen = observer(() => {
               active={recordsStore.days === 30}
               onPress={() => recordsStore.setDays(30)}
             />
+            <PillButton
+              label={t("screens:records.filters.allTime", {
+                defaultValue: "Vše",
+              })}
+              active={recordsStore.days == null}
+              onPress={() => recordsStore.setDays(null)}
+            />
           </View>
         </View>
 
@@ -175,7 +182,9 @@ export const FilterScreen = observer(() => {
             className={filterScreenStyles.resetButton.pressable}
           >
             <Text className={filterScreenStyles.resetButton.text}>
-              {t("screens:records.filters.reset", { defaultValue: "Resetovat" })}
+              {t("screens:records.filters.reset", {
+                defaultValue: "Resetovat",
+              })}
             </Text>
           </Pressable>
         </View>

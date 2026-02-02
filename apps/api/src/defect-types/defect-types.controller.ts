@@ -1,13 +1,13 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiSecurity, ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { DeviceIdGuard } from '../common/auth/device-id.guard';
-import { DEFECT_TYPES } from './defect-types.constants';
-import { DefectTypeItemDto } from './dto/defect-type-item.dto';
+import { Controller, Get, UseGuards } from "@nestjs/common";
+import { ApiSecurity, ApiTags, ApiOkResponse } from "@nestjs/swagger";
+import { DeviceIdGuard } from "../common/auth/device-id.guard";
+import { DEFECT_TYPES } from "./defect-types.constants";
+import { DefectTypeItemDto } from "./dto/defect-type-item.dto";
 
-@ApiTags('defect-types')
-@ApiSecurity('device-id')
+@ApiTags("defect-types")
+@ApiSecurity("device-id")
 @UseGuards(DeviceIdGuard)
-@Controller('defect-types')
+@Controller("defect-types")
 export class DefectTypesController {
   @ApiOkResponse({ type: DefectTypeItemDto, isArray: true })
   @Get()

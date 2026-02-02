@@ -22,7 +22,7 @@ export type ListRecordsResponse = {
   total: number;
   limit: number;
   offset: number;
-  days: 7 | 14 | 30;
+  days: 7 | 14 | 30 | null;
   hasMore: boolean;
 };
 
@@ -37,7 +37,7 @@ export class RecordsStore {
   // Paging
   limit = 20;
   offset = 0;
-  days: 7 | 14 | 30 = 30;
+  days: 7 | 14 | 30 | null = null;
   hasMore = true;
 
   // Sort defaults match backend
@@ -55,7 +55,7 @@ export class RecordsStore {
     this.error = null;
   }
 
-  setDays(days: 7 | 14 | 30) {
+  setDays(days: 7 | 14 | 30 | null) {
     if (this.days === days) return;
     this.days = days;
   }
@@ -126,7 +126,9 @@ export class RecordsStore {
 
   private buildQuery() {
     const params = new URLSearchParams();
-    params.set("days", String(this.days));
+    if (this.days != null) {
+      params.set("days", String(this.days));
+    }
     params.set("limit", String(this.limit));
     params.set("offset", String(this.offset));
     params.set("sortBy", this.sortBy);

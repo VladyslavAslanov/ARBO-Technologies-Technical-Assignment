@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { RecordListItemDto } from './record-list-item.dto';
+import { ApiProperty } from "@nestjs/swagger";
+import { RecordListItemDto } from "./record-list-item.dto";
 
 export class ListRecordsResponseDto {
   @ApiProperty({ type: [RecordListItemDto] })

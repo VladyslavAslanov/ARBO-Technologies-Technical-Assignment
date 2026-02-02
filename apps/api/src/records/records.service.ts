@@ -1,15 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, DefectType } from '@prisma/client';
-import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../database/prisma.service';
-import { CreateRecordDto } from './dto/create-record.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma, DefectType } from "@prisma/client";
+import { ConfigService } from "@nestjs/config";
+import { PrismaService } from "../database/prisma.service";
+import { CreateRecordDto } from "./dto/create-record.dto";
 import {
   ListRecordsQuery,
   RecordsSortBy,
   SortOrder,
-} from './dto/list-records.query';
-import path from 'path';
-import fs from 'fs/promises';
+} from "./dto/list-records.query";
+import path from "path";
+import fs from "fs/promises";
 
 type UploadedPhoto = {
   path: string;
@@ -22,13 +22,13 @@ type UploadedPhoto = {
 export class RecordsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly config: ConfigService,
+    private readonly config: ConfigService
   ) {}
 
   async createRecord(
     userId: string,
     dto: CreateRecordDto,
-    photos: UploadedPhoto[],
+    photos: UploadedPhoto[]
   ) {
     const now = new Date();
 
@@ -79,7 +79,7 @@ export class RecordsService {
               sizeBytes: true,
               createdAt: true,
             },
-            orderBy: { createdAt: 'asc' },
+            orderBy: { createdAt: "asc" },
           },
         },
       });
@@ -133,12 +133,12 @@ export class RecordsService {
 
     // Map DTO enums to Prisma.SortOrder
     const prismaOrder: Prisma.SortOrder =
-      query.order === SortOrder.asc ? 'asc' : 'desc';
+      query.order === SortOrder.asc ? "asc" : "desc";
 
     const orderBy: Prisma.TreeDefectRecordOrderByWithRelationInput[] =
       (query.sortBy ?? RecordsSortBy.createdAt) === RecordsSortBy.severity
-        ? [{ severity: prismaOrder }, { id: 'asc' }]
-        : [{ createdAt: prismaOrder }, { id: 'asc' }];
+        ? [{ severity: prismaOrder }, { id: "asc" }]
+        : [{ createdAt: prismaOrder }, { id: "asc" }];
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.treeDefectRecord.findMany({
@@ -149,7 +149,7 @@ export class RecordsService {
         include: {
           photos: {
             take: 1,
-            orderBy: { createdAt: 'asc' },
+            orderBy: { createdAt: "asc" },
             select: { path: true },
           },
           _count: { select: { photos: true } },
@@ -182,8 +182,7 @@ export class RecordsService {
   }
 
   private toAbsoluteUploadPath(storedPath: string): string {
-    // storedPath example: "/uploads/<filename>.jpg"
-    const uploadDir = this.config.get<string>('UPLOAD_DIR') ?? './uploads';
+    const uploadDir = this.config.get<string>("UPLOAD_DIR") ?? "./uploads";
     const filename = path.basename(storedPath); // prevent path traversal
     return path.resolve(process.cwd(), uploadDir, filename);
   }
@@ -204,13 +203,13 @@ export class RecordsService {
             sizeBytes: true,
             createdAt: true,
           },
-          orderBy: { createdAt: 'asc' },
+          orderBy: { createdAt: "asc" },
         },
       },
     });
 
     if (!record) {
-      throw new NotFoundException('Record not found');
+      throw new NotFoundException("Record not found");
     }
 
     return {
@@ -231,11 +230,11 @@ export class RecordsService {
     });
 
     if (!record) {
-      throw new NotFoundException('Record not found');
+      throw new NotFoundException("Record not found");
     }
 
     const filePaths = record.photos.map((p) =>
-      this.toAbsoluteUploadPath(p.path),
+      this.toAbsoluteUploadPath(p.path)
     );
 
     // Delete DB rows (RecordPhoto is cascaded by relation)
@@ -251,9 +250,9 @@ export class RecordsService {
         } catch {
           // Best-effort cleanup
         }
-      }),
+      })
     );
 
-    return { status: 'deleted' as const };
+    return { status: "deleted" as const };
   }
 }

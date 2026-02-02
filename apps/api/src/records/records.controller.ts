@@ -11,7 +11,7 @@ import {
   UploadedFiles,
   UseGuards,
   UseInterceptors,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiBody,
   ApiConsumes,
@@ -20,20 +20,20 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiQuery,
-} from '@nestjs/swagger';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import * as path from 'path';
-import * as fs from 'fs';
-import { randomUUID } from 'crypto';
+} from "@nestjs/swagger";
+import { FilesInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import * as path from "path";
+import * as fs from "fs";
+import { randomUUID } from "crypto";
 
-import { DeviceIdGuard } from '../common/auth/device-id.guard';
-import { UserId } from '../common/decorators/user-id.decorator';
-import { CreateRecordDto } from './dto/create-record.dto';
-import { ListRecordsQuery } from './dto/list-records.query';
-import { RecordsService } from './records.service';
-import { RecordDetailResponseDto } from 'apps/api/src/records/dto/responses/record-detail-response.dto';
-import { ListRecordsResponseDto } from 'apps/api/src/records/dto/responses/list-records-response.dto';
+import { DeviceIdGuard } from "../common/auth/device-id.guard";
+import { UserId } from "../common/decorators/user-id.decorator";
+import { CreateRecordDto } from "./dto/create-record.dto";
+import { ListRecordsQuery } from "./dto/list-records.query";
+import { RecordsService } from "./records.service";
+import { RecordDetailResponseDto } from "apps/api/src/records/dto/responses/record-detail-response.dto";
+import { ListRecordsResponseDto } from "apps/api/src/records/dto/responses/list-records-response.dto";
 
 function ensureDir(dirPath: string) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -51,60 +51,60 @@ function cleanupFiles(files: Express.Multer.File[]) {
 
 function mimeToExt(mime: string): string {
   switch (mime) {
-    case 'image/jpeg':
-      return '.jpg';
-    case 'image/png':
-      return '.png';
-    case 'image/heic':
-      return '.heic';
-    case 'image/heif':
-      return '.heif';
+    case "image/jpeg":
+      return ".jpg";
+    case "image/png":
+      return ".png";
+    case "image/heic":
+      return ".heic";
+    case "image/heif":
+      return ".heif";
     default:
-      return '.bin';
+      return ".bin";
   }
 }
 
-@ApiTags('records')
-@ApiSecurity('device-id')
+@ApiTags("records")
+@ApiSecurity("device-id")
 @UseGuards(DeviceIdGuard)
-@Controller('records')
+@Controller("records")
 export class RecordsController {
   constructor(private readonly records: RecordsService) {}
 
   @Post()
-  @ApiConsumes('multipart/form-data')
+  @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
-      type: 'object',
-      required: ['defectType', 'severity', 'photos'],
+      type: "object",
+      required: ["defectType", "severity", "photos"],
       properties: {
-        defectType: { type: 'string' },
-        severity: { type: 'number' },
-        note: { type: 'string' },
-        lat: { type: 'number' },
-        lng: { type: 'number' },
-        locationAccuracy: { type: 'number' },
-        recordedAt: { type: 'string', format: 'date-time' },
+        defectType: { type: "string" },
+        severity: { type: "number" },
+        note: { type: "string" },
+        lat: { type: "number" },
+        lng: { type: "number" },
+        locationAccuracy: { type: "number" },
+        recordedAt: { type: "string", format: "date-time" },
         photos: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
+          type: "array",
+          items: { type: "string", format: "binary" },
         },
       },
     },
   })
   @UseInterceptors(
-    FilesInterceptor('photos', 10, {
+    FilesInterceptor("photos", 10, {
       limits: { files: 10, fileSize: 5 * 1024 * 1024 },
       fileFilter: (_req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/heic', 'image/heif'];
+        const allowed = ["image/jpeg", "image/png", "image/heic", "image/heif"];
         if (!allowed.includes(file.mimetype)) {
-          return cb(new BadRequestException('Unsupported file type'), false);
+          return cb(new BadRequestException("Unsupported file type"), false);
         }
         cb(null, true);
       },
       storage: diskStorage({
         destination: (req, _file, cb) => {
-          const uploadDir = process.env.UPLOAD_DIR ?? './uploads';
+          const uploadDir = process.env.UPLOAD_DIR ?? "./uploads";
           const abs = path.resolve(process.cwd(), uploadDir);
           ensureDir(abs);
           cb(null, abs);
@@ -114,22 +114,22 @@ export class RecordsController {
           cb(null, `${randomUUID()}${ext}`);
         },
       }),
-    }),
+    })
   )
   @Post()
   @ApiCreatedResponse({ type: RecordDetailResponseDto })
   async create(
     @UserId() userId: string,
     @Body() body: CreateRecordDto,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles() files: Express.Multer.File[]
   ) {
     if (!files || files.length < 1) {
-      throw new BadRequestException('At least one photo is required');
+      throw new BadRequestException("At least one photo is required");
     }
 
     if (files.length > 10) {
       cleanupFiles(files);
-      throw new BadRequestException('Too many photos');
+      throw new BadRequestException("Too many photos");
     }
 
     const photos = files.map((f) => ({
@@ -149,61 +149,61 @@ export class RecordsController {
 
   @Get()
   @ApiOkResponse({ type: ListRecordsResponseDto })
-  @ApiQuery({ name: 'days', required: false, enum: [7, 14, 30] })
+  @ApiQuery({ name: "days", required: false, enum: [7, 14, 30] })
   @ApiQuery({
-    name: 'limit',
+    name: "limit",
     required: false,
-    schema: { type: 'integer', minimum: 1, maximum: 100 },
+    schema: { type: "integer", minimum: 1, maximum: 100 },
   })
   @ApiQuery({
-    name: 'offset',
+    name: "offset",
     required: false,
-    schema: { type: 'integer', minimum: 0 },
+    schema: { type: "integer", minimum: 0 },
   })
   @ApiQuery({
-    name: 'sortBy',
+    name: "sortBy",
     required: false,
-    enum: ['createdAt', 'severity'],
+    enum: ["createdAt", "severity"],
   })
-  @ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] })
+  @ApiQuery({ name: "order", required: false, enum: ["asc", "desc"] })
   @ApiQuery({
-    name: 'minSeverity',
+    name: "minSeverity",
     required: false,
-    schema: { type: 'integer', minimum: 1, maximum: 5 },
-  })
-  @ApiQuery({
-    name: 'maxSeverity',
-    required: false,
-    schema: { type: 'integer', minimum: 1, maximum: 5 },
+    schema: { type: "integer", minimum: 1, maximum: 5 },
   })
   @ApiQuery({
-    name: 'hasLocation',
+    name: "maxSeverity",
     required: false,
-    schema: { type: 'boolean' },
+    schema: { type: "integer", minimum: 1, maximum: 5 },
   })
   @ApiQuery({
-    name: 'defectType',
+    name: "hasLocation",
+    required: false,
+    schema: { type: "boolean" },
+  })
+  @ApiQuery({
+    name: "defectType",
     required: false,
     isArray: true,
-    description: 'Repeatable query param: ?defectType=A&defectType=B',
+    description: "Repeatable query param: ?defectType=A&defectType=B",
   })
   async list(@UserId() userId: string, @Query() query: ListRecordsQuery) {
     return this.records.listRecords(userId, query);
   }
 
-  @Get(':id')
+  @Get(":id")
   @ApiOkResponse({ type: RecordDetailResponseDto })
   async getById(
     @UserId() userId: string,
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param("id", new ParseUUIDPipe({ version: "4" })) id: string
   ) {
     return this.records.getRecordById(userId, id);
   }
 
-  @Delete(':id')
+  @Delete(":id")
   async remove(
     @UserId() userId: string,
-    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Param("id", new ParseUUIDPipe({ version: "4" })) id: string
   ) {
     return this.records.deleteRecord(userId, id);
   }
