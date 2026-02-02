@@ -1,0 +1,54 @@
+{
+  "records": {
+    "title": "Records",
+    "empty": "No records yet",
+    "filters": {
+      "days": "Period",
+      "sort": "Sort",
+      "sortCreatedAt": "Newest",
+      "sortSeverity": "Severity",
+      "defectType": "Defect",
+      "allDefects": "All",
+      "selected": "Selected",
+      "close": "Close",
+      "clear": "Clear",
+      "severity": "Severity",
+      "min": "Min",
+      "max": "Max",
+      "any": "—",
+      "reset": "Reset"
+    }
+  },
+  "recordDetail": {
+    "title": "Record detail",
+    "deleteTitle": "Delete record",
+    "deleteConfirm": "Are you sure you want to delete this record?",
+    "note": "Note",
+    "location": "Location",
+    "photos": "Photos"
+  },
+    "create": {
+      "title": "New record",
+  
+      "defectType": "Defect",
+      "severity": "Severity (1–5)",
+      "note": "Note",
+      "notePlaceholder": "Optional…",
+  
+      "photos": "Photos",
+      "takePhoto": "Take photo",
+      "pickFromGallery": "Choose from gallery",
+      "submit": "Submit",
+  
+      "permissionTitle": "Permission",
+      "permissionMedia": "Gallery access is required.",
+      "permissionCamera": "Camera access is required.",
+  
+      "validationMinPhotos": "Please add at least 1 photo.",
+      "photoTooLarge": "One of the photos is larger than 5 MB after JPEG conversion.",
+      "createFailed": "Failed to create the record.",
+  
+      "photoLimits": "Limit: max 10 photos, each up to 5 MB (after JPEG conversion).",
+      "maxPhotosReached": "You reached the 10 photo limit. Additional photos were skipped."
+    }
+}

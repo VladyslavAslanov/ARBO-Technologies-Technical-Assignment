@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 
 import { useStores } from "../../core/rootStore";
 import { recordsScreenStyles } from "./RecordsScreenStyles";
+import LanguagePicker from "../../components/LanguageToggle/LanguageToggle";
 
 export const RecordsScreen = observer(() => {
   const { t } = useTranslation(["screens", "common", "defects"]);
@@ -87,6 +88,9 @@ export const RecordsScreen = observer(() => {
         </Text>
 
         <View className={recordsScreenStyles.header.actionsRow}>
+
+          <LanguagePicker />
+
           <Pressable
             onPress={() => router.push("/filters")}
             className={recordsScreenStyles.header.iconButton}

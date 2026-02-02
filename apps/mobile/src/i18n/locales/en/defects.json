@@ -1,0 +1,34 @@
+{
+  "DEAD_WOOD": { "label": "Dead branches", "description": "" },
+  "CRACKS": { "label": "Cracks", "description": "" },
+  "WEAK_UNION_INCLUDED_BARK": {
+    "label": "Weak union / included bark",
+    "description": ""
+  },
+  "HEARTWOOD_DECAY": { "label": "Heartwood decay", "description": "" },
+  "SAPWOOD_DAMAGE_DECAY": {
+    "label": "Sapwood damage / decay",
+    "description": ""
+  },
+  "CAVITY_HOLLOW": { "label": "Cavity", "description": "" },
+  "CONKS_MUSHROOMS": {
+    "label": "Wood-decay fungi (fruiting bodies)",
+    "description": ""
+  },
+  "CANKERS_GALLS_BURLS": {
+    "label": "Cankers / galls / burls",
+    "description": ""
+  },
+  "ROOT_PROBLEMS": { "label": "Root problems", "description": "" },
+  "ROOT_PLATE_LIFTING": {
+    "label": "Root plate lifting",
+    "description": ""
+  },
+  "LEAN": { "label": "Leaning", "description": "" },
+  "POOR_ARCHITECTURE": {
+    "label": "Poor crown architecture",
+    "description": ""
+  },
+  "LIGHTNING_DAMAGE": { "label": "Lightning damage", "description": "" },
+  "SAP_OOZE": { "label": "Sap oozing", "description": "" }
+}

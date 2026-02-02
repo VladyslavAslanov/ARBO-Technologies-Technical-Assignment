@@ -175,7 +175,7 @@ export const FilterScreen = observer(() => {
             className={filterScreenStyles.resetButton.pressable}
           >
             <Text className={filterScreenStyles.resetButton.text}>
-              {t("screens:filters.reset", { defaultValue: "Resetovat" })}
+              {t("screens:records.filters.reset", { defaultValue: "Resetovat" })}
             </Text>
           </Pressable>
         </View>

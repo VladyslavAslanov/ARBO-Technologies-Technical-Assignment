@@ -15,7 +15,8 @@
       "severity": "Závažnost",
       "min": "Min",
       "max": "Max",
-      "any": "—"
+      "any": "—",
+      "reset": "Resetovat"
     }
   },
   "recordDetail": {
@@ -27,3 +28,4 @@
     "photos": "Fotky"
   }
 }
+ 

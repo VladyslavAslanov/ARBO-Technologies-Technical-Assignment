@@ -15,12 +15,15 @@ export default function RootLayout() {
 
   useEffect(() => {
     const run = async () => {
+      await rootStore.languageStore.init();
       await rootStore.sessionStore.init();
+  
       const deviceId = rootStore.sessionStore.deviceId;
       if (deviceId) {
         await rootStore.defectTypesStore.load(deviceId);
       }
     };
+  
     run();
   }, []);
 
